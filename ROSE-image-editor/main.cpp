@@ -78,9 +78,10 @@ int main()
 
     // --- State Variables ---
     bool show_plot_2d = false;
-    bool config_window = false;
-    bool example = true;
-    static char formula_buffer[128] = "sin(x)"; // Default formula
+    static char formula_buffer[128] = "sin(x)";
+    bool show_performance = false;
+    float fps_history[120] = { 0 };
+    int fps_history_idx = 0;
 
     // Main while loop
     while (!glfwWindowShouldClose(window))
@@ -97,64 +98,134 @@ int main()
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
 
+        // Track FPS history
+        fps_history[fps_history_idx % 120] = ImGui::GetIO().Framerate;
+        fps_history_idx++;
+
         // 1. TOP MENU BAR
         if (ImGui::BeginMainMenuBar())
         {
-            if (ImGui::BeginMenu("Files"))
+            if (ImGui::BeginMenu("File"))
             {
-                if (ImGui::MenuItem("Open")) { /* Logic Open */ }
+                if (ImGui::MenuItem("New", "Ctrl+N")) { /* New file */ }
+                if (ImGui::MenuItem("Open", "Ctrl+O")) { /* Open file */ }
                 ImGui::Separator();
-                if (ImGui::MenuItem("Close", "Alt+F4")) { glfwSetWindowShouldClose(window, true); }
+                if (ImGui::MenuItem("Save", "Ctrl+S")) { /* Save file */ }
+                if (ImGui::MenuItem("Save As...", "Ctrl+Shift+S")) { /* Save As */ }
+                ImGui::Separator();
+                if (ImGui::MenuItem("Export As...")) { /* Export */ }
+                ImGui::Separator();
+                if (ImGui::MenuItem("Exit", "Alt+F4")) { glfwSetWindowShouldClose(window, true); }
                 ImGui::EndMenu();
             }
-            if (ImGui::BeginMenu("Tools"))
+            if (ImGui::BeginMenu("Edit"))
             {
-                ImGui::MenuItem("Plot2D", NULL, &show_plot_2d);
-                ImGui::MenuItem("RS config", NULL, &config_window);
+                if (ImGui::MenuItem("Undo", "Ctrl+Z")) { /* Undo */ }
+                if (ImGui::MenuItem("Redo", "Ctrl+Y")) { /* Redo */ }
+                ImGui::Separator();
+                if (ImGui::MenuItem("Cut", "Ctrl+X")) { /* Cut */ }
+                if (ImGui::MenuItem("Copy", "Ctrl+C")) { /* Copy */ }
+                if (ImGui::MenuItem("Paste", "Ctrl+V")) { /* Paste */ }
+                ImGui::Separator();
+                if (ImGui::MenuItem("Preferences", "Ctrl+K")) { /* Preferences */ }
+                ImGui::EndMenu();
+            }
+            if (ImGui::BeginMenu("Image"))
+            {
+                if (ImGui::MenuItem("Adjustments...")) { /* Adjustments */ }
+                ImGui::Separator();
+                if (ImGui::MenuItem("Canvas Size...", "Ctrl+Alt+C")) { /* Canvas Size */ }
+                if (ImGui::MenuItem("Image Size...", "Ctrl+Alt+I")) { /* Image Size */ }
+                ImGui::Separator();
+                if (ImGui::MenuItem("Rotate Canvas")) { /* Rotate */ }
+                if (ImGui::MenuItem("Flip Horizontal")) { /* Flip H */ }
+                if (ImGui::MenuItem("Flip Vertical")) { /* Flip V */ }
+                ImGui::EndMenu();
+            }
+            if (ImGui::BeginMenu("Layer"))
+            {
+                if (ImGui::MenuItem("New Layer...", "Ctrl+Shift+N")) { /* New Layer */ }
+                if (ImGui::MenuItem("Duplicate Layer")) { /* Duplicate */ }
+                if (ImGui::MenuItem("Delete Layer", "Del")) { /* Delete */ }
+                ImGui::Separator();
+                if (ImGui::MenuItem("Layer Style...")) { /* Layer Style */ }
+                ImGui::Separator();
+                if (ImGui::MenuItem("Merge Down", "Ctrl+E")) { /* Merge */ }
+                if (ImGui::MenuItem("Flatten Image")) { /* Flatten */ }
+                ImGui::EndMenu();
+            }
+            if (ImGui::BeginMenu("Select"))
+            {
+                if (ImGui::MenuItem("All", "Ctrl+A")) { /* Select All */ }
+                if (ImGui::MenuItem("Deselect", "Ctrl+D")) { /* Deselect */ }
+                if (ImGui::MenuItem("Inverse", "Ctrl+Shift+I")) { /* Inverse */ }
+                ImGui::Separator();
+                if (ImGui::MenuItem("Color Range...")) { /* Color Range */ }
+                if (ImGui::MenuItem("Modify >")) { /* Modify */ }
+                ImGui::EndMenu();
+            }
+            if (ImGui::BeginMenu("Filter"))
+            {
+                if (ImGui::BeginMenu("Blur"))
+                {
+                    if (ImGui::MenuItem("Gaussian Blur")) { /* Gaussian */ }
+                    if (ImGui::MenuItem("Motion Blur")) { /* Motion */ }
+                    if (ImGui::MenuItem("Box Blur")) { /* Box */ }
+                    ImGui::EndMenu();
+                }
+                if (ImGui::BeginMenu("Sharpen"))
+                {
+                    if (ImGui::MenuItem("Unsharp Mask...")) { /* Unsharp */ }
+                    if (ImGui::MenuItem("Smart Sharpen...")) { /* Smart */ }
+                    ImGui::EndMenu();
+                }
+                if (ImGui::BeginMenu("Distort"))
+                {
+                    if (ImGui::MenuItem("Liquify...")) { /* Liquify */ }
+                    if (ImGui::MenuItem("Wave...")) { /* Wave */ }
+                    ImGui::EndMenu();
+                }
+                if (ImGui::BeginMenu("Noise"))
+                {
+                    if (ImGui::MenuItem("Add Noise...")) { /* Add */ }
+                    if (ImGui::MenuItem("Despeckle")) { /* Despeckle */ }
+                    ImGui::EndMenu();
+                }
+                ImGui::Separator();
+                if (ImGui::MenuItem("Last Filter", "Ctrl+F")) { /* Last Filter */ }
+                ImGui::EndMenu();
+            }
+            if (ImGui::BeginMenu("View"))
+            {
+                if (ImGui::MenuItem("Zoom In", "Ctrl+=")) { /* Zoom In */ }
+                if (ImGui::MenuItem("Zoom Out", "Ctrl+-")) { /* Zoom Out */ }
+                if (ImGui::MenuItem("Fit on Screen", "Ctrl+0")) { /* Fit */ }
+                ImGui::Separator();
+                if (ImGui::MenuItem("Rulers", "Ctrl+R")) { /* Rulers */ }
+                if (ImGui::MenuItem("Grid", "Ctrl+'")) { /* Grid */ }
+                if (ImGui::MenuItem("Snap", "Ctrl+Shift+;")) { /* Snap */ }
+                ImGui::EndMenu();
+            }
+            if (ImGui::BeginMenu("Window"))
+            {
+                if (ImGui::MenuItem("Layers Panel", "F7")) { /* Layers */ }
+                if (ImGui::MenuItem("Channels")) { /* Channels */ }
+                if (ImGui::MenuItem("History")) { /* History */ }
+                if (ImGui::MenuItem("Toolbar")) { /* Toolbar */ }
+                ImGui::Separator();
+                if (ImGui::MenuItem("Performance", NULL, &show_performance)) { /* Performance */ }
+                ImGui::Separator();
+                if (ImGui::MenuItem("Reset Workspace")) { /* Reset */ }
+                ImGui::EndMenu();
+            }
+            if (ImGui::BeginMenu("Help"))
+            {
+                if (ImGui::MenuItem("About ROSE Editor")) { /* About */ }
+                if (ImGui::MenuItem("Keyboard Shortcuts", "Ctrl+Alt+K")) { /* Shortcuts */ }
                 ImGui::EndMenu();
             }
             ImGui::EndMainMenuBar();
         }
-
-        if (example)
-        {
-            ImGui::Begin("test", &example);
-            ImGui::BulletText("First Item");
-            ImGui::BulletText("Second Item");
-            ImGui::PushTextWrapPos(ImGui::GetCursorPos().x + 200.0f);
-            ImGui::Text("This long sentence will automatically wrap once it hits the 200px limit.");
-            ImGui::PopTextWrapPos();
-            ImGui::Text("Left Side");
-            ImGui::SameLine(ImGui::GetWindowWidth() - 100);
-            ImGui::Text("Right Side");
-            ImGui::Text("Left Side");
-            ImGui::SameLine(ImGui::GetWindowWidth() - 100);
-            ImGui::Text("Right Side");
-            ImVec2 pos = ImGui::GetCursorScreenPos();
-            ImGui::GetWindowDrawList()->AddRectFilled(pos, ImVec2(pos.x + 100, pos.y + 20), IM_COL32(255, 255, 0, 100));
-            ImGui::Text("Highlighted!");
-            ImGui::Text("This is normal text.");
-            ImGui::TextColored(ImVec4(1.0f, 0.5f, 0.0f, 1.0f), "This is Orange text.");
-            ImGui::TextColored(ImVec4(0.0f, 1.0f, 1.0f, 1.0f), "This is Cyan text.");
-            ImGui::TextDisabled("This is 'Disabled' text (usually gray).");
-
-            const char* text = "ADAPTIVE MATHEMATICAL PLOTTER";
-            for (int i = 0; i < strlen(text); i++) {
-                float hue = i * 0.1f;
-                ImGui::TextColored(ImColor::HSV(hue, 0.6f, 1.0f), "%c", text[i]);
-                ImGui::SameLine(0.0f, 0.0f); // Keep letters on the same line with no spacing
-            }
-            ImGui::NewLine();
-
-            // Success Status
-            ImGui::TextColored(ImVec4(0, 1, 0, 1), " (V) ");
-            ImGui::SameLine();
-            ImGui::Text("System Online");
-            ImGui::Text("test updare");
-            ImGui::Text("test COde");
-            ImGui::End();
-        }
-
 
         // 2. PLOT 2D WINDOW (GeoGebra Style)
         if (show_plot_2d)
@@ -204,19 +275,99 @@ int main()
             ImGui::End();
         }
 
-        if (config_window)
+        // 3. PERFORMANCE WINDOW (FPS + Dynamic Plot)
+        if (show_performance)
         {
-            ImGui::Begin("Rs config");
-            ImGui::TextWrapped("Hello World, This is my personal project that i make it like my hobby. i like to watch behind the sence in many different game");
-            char buffer[256] = "";
-            ImGui::InputText("Text", buffer, sizeof(buffer));
-            ImGui::TextWrapped("Hello, World!");
-            float value = 1.23f;
-            ImGui::TextWrapped("The value is: %f", value);
-            ImGui::TextLinkOpenURL("https://bkwschool.ac.th/");
-            ImGui::Text("test update");
+            // Ring-buffer for the last 120 FPS samples
+            static float  fps_history[120] = {};
+            static int    fps_offset = 0;
+            static double fps_refresh_time = 0.0;
+
+            double now = ImGui::GetTime();
+            // Sample up to 60 times per second so the graph scrolls smoothly
+            if (now - fps_refresh_time >= 1.0 / 60.0)
+            {
+                fps_history[fps_offset] = ImGui::GetIO().Framerate;
+                fps_offset = (fps_offset + 1) % IM_ARRAYSIZE(fps_history);
+                fps_refresh_time = now;
+            }
+
+            // Ring-buffer for frame time (ms) — same approach
+            static float  ms_history[120] = {};
+            static int    ms_offset = 0;
+            {
+                static double ms_refresh_time = 0.0;
+                if (now - ms_refresh_time >= 1.0 / 60.0)
+                {
+                    float framerate = ImGui::GetIO().Framerate;
+                    ms_history[ms_offset] = (framerate > 0.f) ? 1000.f / framerate : 0.f;
+                    ms_offset = (ms_offset + 1) % IM_ARRAYSIZE(ms_history);
+                    ms_refresh_time = now;
+                }
+            }
+
+            ImGui::SetNextWindowPos(ImVec2(10, 30), ImGuiCond_Always);
+            ImGui::SetNextWindowBgAlpha(0.45f);
+            ImGui::SetNextWindowSize(ImVec2(320, 0), ImGuiCond_Always);
+
+            ImGuiWindowFlags flags =
+                ImGuiWindowFlags_NoMove |
+                ImGuiWindowFlags_NoTitleBar |
+                ImGuiWindowFlags_NoResize |
+                ImGuiWindowFlags_AlwaysAutoResize;
+
+            ImGui::Begin("FPS window", &show_performance, flags);
+
+            float currentFPS = ImGui::GetIO().Framerate;
+            float currentMS = (currentFPS > 0.f) ? 1000.f / currentFPS : 0.f;
+
+            // ── FPS coloured text ──────────────────────────────────────────────────
+            ImVec4 fpsColor = (currentFPS >= 55.f) ? ImVec4(0, 1, 0, 1)
+                : (currentFPS >= 30.f) ? ImVec4(1, 1, 0, 1)
+                : ImVec4(1, 0, 0, 1);
+            ImGui::TextColored(fpsColor, "FPS: %.1f", currentFPS);
+            ImGui::SameLine();
+            ImGui::TextDisabled("(%.2f ms)", currentMS);
+
+            // ── FPS PlotLines — the graph follows the real framerate ───────────────
+            ImGui::SeparatorText("FPS History");
+            {
+                float max_fps = 0.0f;
+                float min_fps = FLT_MAX;
+                for (int i = 0; i < 120; i++) {
+                    if (fps_history[i] > max_fps) max_fps = fps_history[i];
+                    if (fps_history[i] < min_fps) min_fps = fps_history[i];
+                }
+
+                char overlay[32];
+                snprintf(overlay, sizeof(overlay), "%.0f fps", currentFPS);
+                ImGui::PlotLines("##fps",
+                    fps_history, IM_ARRAYSIZE(fps_history), fps_offset,
+                    overlay,
+                    FLT_MAX, FLT_MAX,      // เปลี่ยนจาก 0.0f, 200.0f เป็น FLT_MAX ทั้งคู่
+                    ImVec2(-1, 70));
+            }
+
+            // ── Frame-time PlotLines ───────────────────────────────────────────────
+            ImGui::SeparatorText("Frame Time (ms)");
+            {
+                char overlay[32];
+                snprintf(overlay, sizeof(overlay), "%.2f ms", currentMS);
+                ImGui::PlotLines("##ms",
+                    ms_history, IM_ARRAYSIZE(ms_history), ms_offset,
+                    overlay,
+                    0.0f, 50.0f,           // y-axis: 0 – 50 ms
+                    ImVec2(-1, 70));
+            }
+
+            // ── Target budget indicator ────────────────────────────────────────────
+            ImGui::Spacing();
+            ImGui::ProgressBar(currentFPS / 60.f, ImVec2(-1, 8), "");
+            ImGui::TextDisabled("Budget vs 60 fps target");
 
             ImGui::End();
+
+
         }
 
 
