@@ -19,6 +19,12 @@
     <Filter Include="Source Files\imgui">
       <UniqueIdentifier>{3d6890b6-bf14-427b-9029-6457556e55bb}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\UIMenu">
+      <UniqueIdentifier>{34bfcc4e-1939-4471-8616-422f117a3230}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\UIMenu">
+      <UniqueIdentifier>{d6f1b66a-5728-4ee9-81af-08b0a95479a3}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -72,6 +78,18 @@
     <ClCompile Include="..\..\ROSE\ROSE\stb.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="menubar.cpp">
+      <Filter>Source Files\UIMenu</Filter>
+    </ClCompile>
+    <ClCompile Include="TextEditor.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\imgui_tex_inspect\imgui_tex_inspect_demo.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\imgui_tex_inspect\imgui_tex_inspect.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="imgui\imconfig.h">
@@ -112,6 +130,24 @@
     </ClInclude>
     <ClInclude Include="implot-3d\implot3d_internal.h">
       <Filter>Header Files\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="menubar.h">
+      <Filter>Header Files\UIMenu</Filter>
+    </ClInclude>
+    <ClInclude Include="TextEditor.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="imgInspect.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\imgui_tex_inspect\imgui_tex_inspect_demo.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\imgui_tex_inspect\imgui_tex_inspect_internal.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\imgui_tex_inspect\imgui_tex_inspect.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

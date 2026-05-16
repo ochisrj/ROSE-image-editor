@@ -5,6 +5,9 @@
 #include "implot.h"
 #include "implot3d.h"
 #include "stb_image.h"
+#include "menubar.h"
+#include "imgui_tex_inspect.h"
+#include "imgui_tex_inspect_internal.h"
 
 #include <stack>
 #include <vector>
@@ -75,6 +78,9 @@ int main()
     ImGui_ImplGlfw_InitForOpenGL(window, true);
     ImGui_ImplOpenGL3_Init("#version 330");
 
+    // เรียกใช้หลังจาก Init ImGui เรียบร้อยแล้ว
+    ImGuiTexInspect::Init();
+    ImGuiTexInspect::CreateContext();
 
     // --- State Variables ---
     bool show_plot_2d = false;
@@ -82,6 +88,7 @@ int main()
     bool show_performance = false;
     float fps_history[120] = { 0 };
     int fps_history_idx = 0;
+
 
     // Main while loop
     while (!glfwWindowShouldClose(window))
@@ -102,6 +109,12 @@ int main()
         fps_history[fps_history_idx % 120] = ImGui::GetIO().Framerate;
         fps_history_idx++;
 
+
+        ImGui::Begin("Texture Inspector");
+        ImGuiTexInspect::ShowDemoWindow();
+
+        ImGui::End();
+        
         // 1. TOP MENU BAR
         if (ImGui::BeginMainMenuBar())
         {
@@ -224,6 +237,8 @@ int main()
                 if (ImGui::MenuItem("Keyboard Shortcuts", "Ctrl+Alt+K")) { /* Shortcuts */ }
                 ImGui::EndMenu();
             }
+
+
             ImGui::EndMainMenuBar();
         }
 
@@ -370,6 +385,8 @@ int main()
 
         }
 
+   
+        
 
         ImGui::Render();
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
@@ -383,6 +400,8 @@ int main()
     ImPlot3D::DestroyContext();
     ImPlot::DestroyContext();
     ImGui::DestroyContext();
+    ImGuiTexInspect::DestroyContext(g_InspectContext); // ถ้ามีการเก็บ pointer ไว้
+    ImGuiTexInspect::Shutdown();
 
     glDeleteVertexArrays(1, &VAO);
     glDeleteBuffers(1, &VBO);
