@@ -110,11 +110,6 @@ int main()
         fps_history_idx++;
 
 
-        ImGui::Begin("Texture Inspector");
-        ImGuiTexInspect::ShowDemoWindow();
-
-        ImGui::End();
-        
         // 1. TOP MENU BAR
         if (ImGui::BeginMainMenuBar())
         {
@@ -400,7 +395,6 @@ int main()
     ImPlot3D::DestroyContext();
     ImPlot::DestroyContext();
     ImGui::DestroyContext();
-    ImGuiTexInspect::DestroyContext(g_InspectContext); // ถ้ามีการเก็บ pointer ไว้
     ImGuiTexInspect::Shutdown();
 
     glDeleteVertexArrays(1, &VAO);
