@@ -137,6 +137,8 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\imgui_tex_inspect\imgui_tex_inspect.cpp" />
+    <ClCompile Include="..\..\imgui_tex_inspect\imgui_tex_inspect_demo.cpp" />
     <ClCompile Include="..\..\implot-master\implot.cpp" />
     <ClCompile Include="..\..\implot-master\implot_demo.cpp" />
     <ClCompile Include="..\..\implot-master\implot_items.cpp" />
@@ -154,10 +156,16 @@
     <ClCompile Include="implot-3d\implot3d_items.cpp" />
     <ClCompile Include="implot-3d\implot3d_meshes.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="menubar.cpp" />
+    <ClCompile Include="TextEditor.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\imgui_tex_inspect\imgui_tex_inspect.h" />
+    <ClInclude Include="..\..\imgui_tex_inspect\imgui_tex_inspect_demo.h" />
+    <ClInclude Include="..\..\imgui_tex_inspect\imgui_tex_inspect_internal.h" />
     <ClInclude Include="..\..\implot-master\implot.h" />
     <ClInclude Include="..\..\implot-master\implot_internal.h" />
+    <ClInclude Include="imgInspect.h" />
     <ClInclude Include="imgui\imconfig.h" />
     <ClInclude Include="imgui\imgui.h" />
     <ClInclude Include="imgui\imgui_impl_glfw.h" />
@@ -169,6 +177,8 @@
     <ClInclude Include="imgui\imstb_truetype.h" />
     <ClInclude Include="implot-3d\implot3d.h" />
     <ClInclude Include="implot-3d\implot3d_internal.h" />
+    <ClInclude Include="menubar.h" />
+    <ClInclude Include="TextEditor.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
