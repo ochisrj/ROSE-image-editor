@@ -30,14 +30,13 @@ void MenuBar::Draw()
 		ImGui::Text("| %.1f FPS", io.Framerate);
 		ImGui::EndMainMenuBar();
 	}
-	/*
+	
 	FileMenu::DrawWindow();
 	EditMenu::DrawWindow();
 	ImageMenu::DrawWindow();
 	LayerMenu::DrawWindow();
 	SelectMenu::DrawWindow();
 	FilterMenu::DrawWindow();
-	ViewMenu::DrawWindow()
-	*/
+	ViewMenu::DrawWindow();
 	WindowMenu::DrawWindow();
 }

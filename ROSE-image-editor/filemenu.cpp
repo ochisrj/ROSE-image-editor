@@ -18,6 +18,7 @@ bool FileMenu::OpenFile = false;
 bool FileMenu::SaveFile = false;
 bool FileMenu::SaveAsFile = false;
 bool FileMenu::ExportFile = false;
+bool FileMenu::Preference = false;
 bool FileMenu::Exit = false;
 
 void FileMenu::DrawMenu()
@@ -31,6 +32,7 @@ void FileMenu::DrawMenu()
         if (ImGui::MenuItem("Save As", "Ctrl+Shift+S",&SaveAsFile)) { /* Save As */ }
         ImGui::Separator();
         if (ImGui::MenuItem("Export As",NULL,&ExportFile)) { /* Export */ }
+        if (ImGui::MenuItem("Preferences", NULL, &Preference)) { }
         ImGui::Separator();
         if (ImGui::MenuItem("Exit", "Alt+F4",&Exit))
         {
@@ -49,4 +51,5 @@ void FileMenu::DrawMenu()
 void FileMenu::DrawWindow()
 {
 
+    
 }

@@ -14,5 +14,6 @@ private:
 	static bool SaveFile;
 	static bool SaveAsFile;
 	static bool ExportFile;
+	static bool Preference;
 	static bool Exit;
 };

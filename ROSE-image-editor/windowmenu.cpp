@@ -19,7 +19,9 @@ bool WindowMenu::History = false;
 bool WindowMenu::Toolbar = false;
 bool WindowMenu::Performace = false;
 bool WindowMenu::ResetWorkspace = false;
-bool WindowMenu::PlotTwoD = false;
+bool WindowMenu::ImguiDemo = false;
+bool WindowMenu::ImplotDemo = false;
+bool WindowMenu::Implot3dDemo = false;
 
 void WindowMenu::DrawMenu()
 {
@@ -31,16 +33,20 @@ void WindowMenu::DrawMenu()
         if (ImGui::MenuItem("Toolbar",NULL,&Toolbar)) { /* Toolbar */ }
         ImGui::Separator();
         if (ImGui::MenuItem("Performance", NULL,&Performace)) { /* Performance */ }
-        ImGui::Separator();
         if (ImGui::MenuItem("Reset Workspace",NULL,&ResetWorkspace)) { /* Reset */ }
-        if (ImGui::MenuItem("Plot2D",NULL,&PlotTwoD)){}
+        ImGuiStyle& style = ImGui::GetStyle();
+        style.SeparatorTextBorderSize = 1.0f;
+        ImGui::SeparatorText("ImGui Plugin");
+        if(ImGui::MenuItem("Imgui Demo", NULL, &ImguiDemo)){}
+        if(ImGui::MenuItem("Implot Demo", NULL, &ImplotDemo)){}
+        if(ImGui::MenuItem("Implot3d Demo",NULL,&Implot3dDemo)){}
         ImGui::EndMenu();
     }
 }
 
 void WindowMenu::DrawWindow()
 {
-    if (!Performace)
+    if (Performace)
     {
         // Ring-buffer for the last 120 FPS samples
         static float  fps_history[120] = {};
@@ -103,20 +109,20 @@ void WindowMenu::DrawWindow()
                 if (fps_history[i] < min_fps) min_fps = fps_history[i];
             }
 
-            char overlay[32];
-            snprintf(overlay, sizeof(overlay), "%.0f fps", currentFPS);
+            char overlayFPS[32];
+            snprintf(overlayFPS, sizeof(overlayFPS), "%.0f fps", currentFPS); 
             ImGui::PlotLines("##fps",
                 fps_history, IM_ARRAYSIZE(fps_history), fps_offset,
-                overlay,
-                FLT_MAX, FLT_MAX,      // เปลี่ยนจาก 0.0f, 200.0f เป็น FLT_MAX ทั้งคู่
-                ImVec2(-1, 70));
+                overlayFPS,
+                FLT_MAX, FLT_MAX,
+                ImVec2(-1, 70));;
         }
 
         // ── Frame-time PlotLines ───────────────────────────────────────────────
         ImGui::SeparatorText("Frame Time (ms)");
         {
             char overlay[32];
-            snprintf(overlay, sizeof(overlay), "%.2f ms", currentMS);
+            snprintf(overlay, sizeof(overlay), "%.0f ms", currentMS);
             ImGui::PlotLines("##ms",
                 ms_history, IM_ARRAYSIZE(ms_history), ms_offset,
                 overlay,
@@ -128,63 +134,23 @@ void WindowMenu::DrawWindow()
         ImGui::Spacing();
         ImGui::ProgressBar(currentFPS / 60.f, ImVec2(-1, 8), "");
         ImGui::TextDisabled("Budget vs 60 fps target");
-
         ImGui::End();
 
 
     }
 
-    /*
-    // 2. PLOT 2D WINDOW (GeoGebra Style)
-    if (!PlotTwoD)
+
+    if(ImguiDemo)
     {
-        static char formula_buffer[128] = "sin(x)";
-        ImGui::SetNextWindowSize(ImVec2(600, 500), ImGuiCond_FirstUseEver);
-        if (ImGui::Begin("2D Function Visualizer", &PlotTwoD))
-        {
-            ImGui::Text("Enter Function:");
-            ImGui::SetNextItemWidth(-1);
-            ImGui::InputText("##formula", formula_buffer, sizeof(formula_buffer));
-            ImGui::TextDisabled("Try: x, x*x, sin(x), cos(x), tan(x)");
-
-            ImGui::Separator();
-
-            if (ImPlot::BeginPlot("##Graph", ImVec2(-1, -1)))
-            {
-                ImPlot::SetupAxes("x", "f(x)");
-                ImPlotRect limits = ImPlot::GetPlotLimits();
-
-                // Generate points dynamically based on view
-                static double x_data[1000], y_data[1000];
-                double step = (limits.X.Max - limits.X.Min) / 999.0;
-
-                for (int i = 0; i < 1000; ++i) {
-                    double x = limits.X.Min + (i * step);
-                    double y = 0;
-
-                    // Simple Parser Logic
-                    std::string f = formula_buffer;
-                    if (f == "x") y = x;
-                    else if (f == "x*x" || f == "x^2") y = x * x;
-                    else if (f == "sin(x)") y = sin(x);
-                    else if (f == "cos(x)") y = cos(x);
-                    else if (f == "tan(x)") y = tan(x);
-                    else if (f == "sqrt(x)") y = sqrt(x);
-                    else y = 0;
-
-                    x_data[i] = x;
-                    y_data[i] = y;
-                }
-
-                ImPlot::SetNextLineStyle(ImVec4(0, 1, 0.7f, 1), 2.0f);
-                ImPlot::PlotLine("f(x)", x_data, y_data, 1000);
-                ImPlot::EndPlot();
-            }
-        }
-        ImGui::End();
+        ImGui::ShowDemoWindow(&ImguiDemo);
     }
-    */
-
-
+    if (ImplotDemo)
+    {
+        ImPlot::ShowDemoWindow(&ImplotDemo);
+    }
+    if (Implot3dDemo)
+    {
+        ImPlot3D::ShowDemoWindow(&Implot3dDemo);
+    }
 
 }

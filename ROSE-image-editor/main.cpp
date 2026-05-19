@@ -38,7 +38,7 @@ int main()
     if (window == NULL) { glfwTerminate(); return -1; }
     glfwMakeContextCurrent(window);
     gladLoadGL();
-    glfwSwapInterval(0);
+    glfwSwapInterval(1);
     glViewport(0, 0, width, height);
 
     // --- Shader & Buffer Setup (Same as your code) ---

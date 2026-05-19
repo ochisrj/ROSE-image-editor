@@ -15,5 +15,7 @@ private:
 	static bool Toolbar;
 	static bool Performace;
 	static bool ResetWorkspace;
-	static bool PlotTwoD;
+	static bool ImguiDemo;
+	static bool ImplotDemo;
+	static bool Implot3dDemo;
 };
