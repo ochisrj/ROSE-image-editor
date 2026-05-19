@@ -81,14 +81,32 @@
     <ClCompile Include="menubar.cpp">
       <Filter>Source Files\UIMenu</Filter>
     </ClCompile>
-    <ClCompile Include="TextEditor.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="editmenu.cpp">
+      <Filter>Source Files\UIMenu</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\imgui_tex_inspect\imgui_tex_inspect_demo.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="filemenu.cpp">
+      <Filter>Source Files\UIMenu</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\imgui_tex_inspect\imgui_tex_inspect.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="filtermenu.cpp">
+      <Filter>Source Files\UIMenu</Filter>
+    </ClCompile>
+    <ClCompile Include="imagemenu.cpp">
+      <Filter>Source Files\UIMenu</Filter>
+    </ClCompile>
+    <ClCompile Include="layermenu.cpp">
+      <Filter>Source Files\UIMenu</Filter>
+    </ClCompile>
+    <ClCompile Include="selectmenu.cpp">
+      <Filter>Source Files\UIMenu</Filter>
+    </ClCompile>
+    <ClCompile Include="viewmenu.cpp">
+      <Filter>Source Files\UIMenu</Filter>
+    </ClCompile>
+    <ClCompile Include="windowmenu.cpp">
+      <Filter>Source Files\UIMenu</Filter>
+    </ClCompile>
+    <ClCompile Include="helpmenu.cpp">
+      <Filter>Source Files\UIMenu</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -134,20 +152,32 @@
     <ClInclude Include="menubar.h">
       <Filter>Header Files\UIMenu</Filter>
     </ClInclude>
-    <ClInclude Include="TextEditor.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="editmenu.h">
+      <Filter>Header Files\UIMenu</Filter>
     </ClInclude>
-    <ClInclude Include="imgInspect.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="filemenu.h">
+      <Filter>Header Files\UIMenu</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\imgui_tex_inspect\imgui_tex_inspect_demo.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="filtermenu.h">
+      <Filter>Header Files\UIMenu</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\imgui_tex_inspect\imgui_tex_inspect_internal.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="imagemenu.h">
+      <Filter>Header Files\UIMenu</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\imgui_tex_inspect\imgui_tex_inspect.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="layermenu.h">
+      <Filter>Header Files\UIMenu</Filter>
+    </ClInclude>
+    <ClInclude Include="selectmenu.h">
+      <Filter>Header Files\UIMenu</Filter>
+    </ClInclude>
+    <ClInclude Include="viewmenu.h">
+      <Filter>Header Files\UIMenu</Filter>
+    </ClInclude>
+    <ClInclude Include="windowmenu.h">
+      <Filter>Header Files\UIMenu</Filter>
+    </ClInclude>
+    <ClInclude Include="helpmenu.h">
+      <Filter>Header Files\UIMenu</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
