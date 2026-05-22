@@ -15,4 +15,5 @@ private:
 	static bool Copy;
 	static bool Paste;
 	static bool Performace;
+	static bool TriangleConfig;
 };

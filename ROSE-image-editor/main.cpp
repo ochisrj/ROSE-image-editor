@@ -89,7 +89,7 @@ int main()
     // Main while loop
     while (!glfwWindowShouldClose(window))
     {
-        glClearColor(0.07f, 0.13f, 0.17f, 1.0f);
+        glClearColor(0.45f, 0.55f, 0.60f, 1.00f);
         glClear(GL_COLOR_BUFFER_BIT);
 
         // Draw background triangle

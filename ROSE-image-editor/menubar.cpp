@@ -16,6 +16,9 @@
 
 void MenuBar::Draw()
 {
+	ImGui::Begin("test");
+	ImGui::Text("canvas");
+	ImGui::End();
 	if (ImGui::BeginMainMenuBar())
 	{
 		FileMenu::DrawMenu();
