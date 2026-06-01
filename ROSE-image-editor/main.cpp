@@ -103,7 +103,7 @@ int main()
 
 
 
-        MenuBar::Draw();
+        MenuBar::Draw(window);
             
         ImGui::Render();
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());

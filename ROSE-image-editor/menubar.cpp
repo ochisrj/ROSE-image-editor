@@ -1,4 +1,4 @@
-#include <glad/glad.h>
+﻿#include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
 #include "menubar.h"
@@ -14,20 +14,35 @@
 
 #include <iostream>
 
-void MenuBar::Draw()
-{
-	ImGui::Begin("test");
-	ImGui::Text("canvas");
+void MenuBar::Draw(GLFWwindow* window)
+{	
+
+	const ImGuiViewport* viewport = ImGui::GetMainViewport();
+
+	ImGui::SetNextWindowPos(viewport->WorkPos);
+	ImGui::SetNextWindowSize(viewport->WorkSize);
+
+	ImGuiWindowFlags window_flags = 
+		ImGuiWindowFlags_NoTitleBar |
+		ImGuiWindowFlags_NoResize |
+		ImGuiWindowFlags_NoMove |
+		ImGuiWindowFlags_NoScrollbar |
+		ImGuiWindowFlags_NoSavedSettings |
+		ImGuiWindowFlags_NoBringToFrontOnFocus |
+		ImGuiWindowFlags_NoNavFocus;
+
+	ImGui::Begin("Full Window", nullptr, window_flags);
 	ImGui::End();
+
 	if (ImGui::BeginMainMenuBar())
 	{
-		FileMenu::DrawMenu();
+		FileMenu::DrawMenu(window);
 		EditMenu::DrawMenu();
+		ViewMenu::DrawMenu();
 		ImageMenu::DrawMenu();
 		LayerMenu::DrawMenu();
 		SelectMenu::DrawMenu();
 		FilterMenu::DrawMenu();
-		ViewMenu::DrawMenu();
 		WindowMenu::DrawMenu();
 		ImGuiIO& io = ImGui::GetIO();
 		ImGui::Text("| %.1f FPS", io.Framerate);
@@ -36,10 +51,10 @@ void MenuBar::Draw()
 	
 	FileMenu::DrawWindow();
 	EditMenu::DrawWindow();
+	ViewMenu::DrawWindow();
 	ImageMenu::DrawWindow();
 	LayerMenu::DrawWindow();
 	SelectMenu::DrawWindow();
 	FilterMenu::DrawWindow();
-	ViewMenu::DrawWindow();
 	WindowMenu::DrawWindow();
 }
