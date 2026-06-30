@@ -33,7 +33,7 @@ void MenuBar::Draw(GLFWwindow* window)
 
 	ImGui::Begin("Full Window", nullptr, window_flags);
 	ImGui::End();
-
+	
 	if (ImGui::BeginMainMenuBar())
 	{
 		FileMenu::DrawMenu(window);

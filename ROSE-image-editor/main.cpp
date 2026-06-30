@@ -4,7 +4,7 @@
 #include "imgui_internal.h"
 #include "implot.h"
 #include "implot3d.h"
-#include "stb_image.h"
+//#include "stb_image.h"
 #include "menubar.h"
 
 #include <stack>
@@ -12,7 +12,6 @@
 #include <sstream>
 #include <map> 
 #include <math.h>
-#include <vector>
 #include <iostream>
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
