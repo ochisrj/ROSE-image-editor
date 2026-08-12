@@ -5,7 +5,12 @@
 #include "implot.h"
 #include "implot3d.h"
 //#include "stb_image.h"
+#include "cascadiafont.h"
 #include "menubar.h"
+#include "camera.h"
+#include "imageviewer.h"
+
+#include <opencv2/core/utils/logger.hpp>
 
 #include <stack>
 #include <vector>
@@ -17,14 +22,81 @@
 #include <GLFW/glfw3.h>
 #include <string>
 
-
-
 // Shader sources
 const char* vertexShaderSource = "#version 330 core\n layout (location = 0) in vec3 aPos;\n void main() { gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0); }\0";
 const char* fragmentShaderSource = "#version 330 core\n out vec4 FragColor;\n void main() { FragColor = vec4(0.8f, 0.3f, 0.02f, 1.0f); }\n\0";
 
+void DrawCameraWindow()
+{
+    static Camera camera;
+    static std::vector<std::string> devices;
+    static int selected = 0;
+    static bool refresh = true;
+
+    if (refresh)
+    {
+        devices = Camera::DetectDevices();
+        refresh = false;
+    }
+
+    if (ImGui::Begin("Camera"))
+    {
+        if (ImGui::BeginCombo("Device", selected < (int)devices.size() ? devices[selected].c_str() : "None"))
+        {
+            for (int i = 0; i < (int)devices.size(); ++i)
+            {
+                const bool isSelected = (selected == i);
+                if (ImGui::Selectable(devices[i].c_str(), isSelected))
+                    selected = i;
+                if (isSelected)
+                    ImGui::SetItemDefaultFocus();
+            }
+            ImGui::EndCombo();
+        }
+
+        ImGui::SameLine();
+        if (ImGui::Button("Refresh"))
+            refresh = true;
+
+        ImGui::SameLine();
+        if (!camera.IsOpen())
+        {
+            if (ImGui::Button("Start"))
+                camera.Open(selected);
+        }
+        else
+        {
+            if (ImGui::Button("Stop"))
+                camera.Close();
+        }
+
+        ImGui::SameLine();
+        ImGui::Text(camera.IsOpen() ? "Streaming" : "Off");
+
+        if (camera.IsOpen())
+        {
+            camera.Update();
+
+            const ImVec2 avail = ImGui::GetContentRegionAvail();
+            const float aspect = camera.GetWidth() > 0 && camera.GetHeight() > 0
+                ? (float)camera.GetWidth() / (float)camera.GetHeight() : 1.0f;
+
+            ImVec2 size = avail;
+            if (size.y * aspect < size.x)
+                size.x = size.y * aspect;
+            else
+                size.y = size.x / aspect;
+
+            ImGui::Image((ImTextureID)(intptr_t)camera.GetTextureID(), size);
+        }
+    }
+    ImGui::End();
+}
+
 int main()
 {
+    cv::utils::logging::setLogLevel(cv::utils::logging::LOG_LEVEL_ERROR);
+
     glfwInit();
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
@@ -37,10 +109,10 @@ int main()
     if (window == NULL) { glfwTerminate(); return -1; }
     glfwMakeContextCurrent(window);
     gladLoadGL();
-    glfwSwapInterval(1);
+    glfwSwapInterval(0);
     glViewport(0, 0, width, height);
 
-    // --- Shader & Buffer Setup (Same as your code) ---
+    // --- Shader & Buffer Setup ---
     GLuint vertexShader = glCreateShader(GL_VERTEX_SHADER);
     glShaderSource(vertexShader, 1, &vertexShaderSource, NULL);
     glCompileShader(vertexShader);
@@ -76,14 +148,9 @@ int main()
     ImGui_ImplGlfw_InitForOpenGL(window, true);
     ImGui_ImplOpenGL3_Init("#version 330");
 
-
-    
-    bool show_plot_2d = false;
-    static char formula_buffer[128] = "sin(x)";
-    bool show_performance = false;
-    float fps_history[120] = { 0 };
-    int fps_history_idx = 0;
-    
+    ImFontConfig font_cfg;
+    font_cfg.FontDataOwnedByAtlas = false;
+    io.Fonts->AddFontFromMemoryTTF(cascadia, cascadiasize, 16.0f, &font_cfg, io.Fonts->GetGlyphRangesThai());
 
     // Main while loop
     while (!glfwWindowShouldClose(window))
@@ -96,14 +163,15 @@ int main()
         glBindVertexArray(VAO);
         glDrawArrays(GL_TRIANGLES, 0, 3);
 
+        // --- Start ImGui Frame ---
         ImGui_ImplOpenGL3_NewFrame();
         ImGui_ImplGlfw_NewFrame();
-        ImGui::NewFrame();
-
-
-
+        ImGui::NewFrame();  
+        
+        //DrawCameraWindow();
+        
         MenuBar::Draw(window);
-            
+
         ImGui::Render();
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
         glfwSwapBuffers(window);
@@ -111,7 +179,8 @@ int main()
     }
 
     // Cleanup
-    ImGui_ImplOpenGL3_Shutdown();
+    ImageViewer::Shutdown();
+    ImGui_ImplOpenGL3_Shutdown();   
     ImGui_ImplGlfw_Shutdown();
     ImPlot3D::DestroyContext();
     ImPlot::DestroyContext();

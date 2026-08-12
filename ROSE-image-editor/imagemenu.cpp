@@ -13,12 +13,15 @@
 
 #include "imagemenu.h"
 
+#include "imageviewer.h"
+
 bool ImageMenu::Adjustment = false;
 bool ImageMenu::CanvasSize = false;
 bool ImageMenu::ImageSize = false;
 bool ImageMenu::RorateCanvas = false;
 bool ImageMenu::FlipHorizontal = false;
 bool ImageMenu::FlipVertical = false;
+bool ImageMenu::show_image_viewer = false;
 
 void ImageMenu::DrawMenu()
 {
@@ -32,11 +35,15 @@ void ImageMenu::DrawMenu()
         if (ImGui::MenuItem("Rotate Canvas",NULL,&RorateCanvas)) { /* Rotate */ }
         if (ImGui::MenuItem("Flip Horizontal",NULL,&FlipHorizontal)) { /* Flip H */ }
         if (ImGui::MenuItem("Flip Vertical",NULL,&FlipVertical)) { /* Flip V */ }
+        ImGui::Separator();
+        if (ImGui::MenuItem("Image Viewer", "Ctrl+I", &show_image_viewer)) { /* Image Viewer toggle */ }
         ImGui::EndMenu();
     }
 }
 
 void ImageMenu::DrawWindow()
 {
-
+    ImageViewer::SetVisible(show_image_viewer);
+    ImageViewer::DrawWindow();
+    show_image_viewer = ImageViewer::IsVisible();
 }

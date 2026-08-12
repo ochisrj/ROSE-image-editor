@@ -11,6 +11,7 @@
 #include "filtermenu.h"
 #include "viewmenu.h"
 #include "windowmenu.h"
+#include "helpmenu.h"
 
 
 struct GLFWwindow;

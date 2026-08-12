@@ -1,5 +1,4 @@
 #pragma once
-
 #include "imgui.h"
 #include <iostream>
 
@@ -9,7 +8,6 @@ public:
 	static void DrawMenu();
 	static void DrawWindow();
 private:
-	static bool AboutROSE;
-	static bool KeyboardShortCut;
-
+    static bool AboutROSE;
+    static bool KeyboardShortCut;
 };

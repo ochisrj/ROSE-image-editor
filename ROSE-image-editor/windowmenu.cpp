@@ -27,10 +27,8 @@ void WindowMenu::DrawMenu()
 {
     if (ImGui::BeginMenu("Window"))
     {
-        if (ImGui::MenuItem("Layers Panel", "F7",&LayerPanel)) { /* Layers */ }
         if (ImGui::MenuItem("Channels",NULL,&Channels)) { /* Channels */ }
         if (ImGui::MenuItem("History",NULL,&History)) { /* History */ }
-        if (ImGui::MenuItem("Toolbar",NULL,&Toolbar)) { /* Toolbar */ }
         ImGui::Separator();
         if (ImGui::MenuItem("Performance", NULL,&Performace)) { /* Performance */ }
         if (ImGui::MenuItem("Reset Workspace",NULL,&ResetWorkspace)) { /* Reset */ }

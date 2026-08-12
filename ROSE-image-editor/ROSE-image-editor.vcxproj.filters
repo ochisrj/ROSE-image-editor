@@ -25,6 +25,18 @@
     <Filter Include="Source Files\UIMenu">
       <UniqueIdentifier>{d6f1b66a-5728-4ee9-81af-08b0a95479a3}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\font">
+      <UniqueIdentifier>{db19f606-f06d-4a07-aace-d0baf5bc36de}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resource Files\image">
+      <UniqueIdentifier>{6b77653c-e6c8-4854-9b94-45043f737402}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\UIViewport">
+      <UniqueIdentifier>{e5a7d18d-95bc-4466-be45-2761a5c76383}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\UIViewport">
+      <UniqueIdentifier>{f7492189-c1ad-4826-870c-d856f22f616f}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -66,9 +78,6 @@
     <ClCompile Include="implot-3d\implot3d_meshes.cpp">
       <Filter>Source Files\imgui</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\ROSE\ROSE\stb.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="menubar.cpp">
       <Filter>Source Files\UIMenu</Filter>
     </ClCompile>
@@ -107,6 +116,12 @@
     </ClCompile>
     <ClCompile Include="implot\implot_items.cpp">
       <Filter>Source Files\imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="CascadiaCode-Regular.c">
+      <Filter>Header Files\font</Filter>
+    </ClCompile>
+    <ClCompile Include="stb.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -179,5 +194,16 @@
     <ClInclude Include="implot\implot.h">
       <Filter>Header Files\imgui</Filter>
     </ClInclude>
+    <ClInclude Include="cascadiafont.h">
+      <Filter>Header Files\font</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="..\..\..\..\OneDrive\Pictures\Picture\56946.jpg">
+      <Filter>Resource Files\image</Filter>
+    </Image>
+    <Image Include="personalimag.png">
+      <Filter>Resource Files\image</Filter>
+    </Image>
   </ItemGroup>
 </Project>
