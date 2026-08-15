@@ -1,154 +1,225 @@
-﻿#include <glad/glad.h>
-#include <GLFW/glfw3.h>
+﻿#include "windowmenu.h"
 
-#include <iostream>
+#include <cstdio>
 
 #include "imgui.h"
-#include "imgui_impl_glfw.h"
-#include "imgui_impl_opengl3.h"
-#include "implot.h"
-#include "implot3d.h"
-#include "implot_internal.h"
-#include "implot3d_internal.h"
-
-#include "windowmenu.h"
-
-bool WindowMenu::LayerPanel = false;
-bool WindowMenu::Channels = false;
-bool WindowMenu::History = false;
-bool WindowMenu::Toolbar = false;
-bool WindowMenu::Performace = false;
-bool WindowMenu::ResetWorkspace = false;
-bool WindowMenu::ImguiDemo = false;
-bool WindowMenu::ImplotDemo = false;
-bool WindowMenu::Implot3dDemo = false;
+#include "appstate.h"
+#include "appcommands.h"
+#include "imageviewer.h"
 
 void WindowMenu::DrawMenu()
 {
     if (ImGui::BeginMenu("Window"))
     {
-        if (ImGui::MenuItem("Channels",NULL,&Channels)) { /* Channels */ }
-        if (ImGui::MenuItem("History",NULL,&History)) { /* History */ }
+        // ---- Arrange ----
+        if (ImGui::BeginMenu("Arrange"))
+        {
+            if (ImGui::MenuItem("Tile All Vertically"))
+                App::Push(Cmd::WindowArrangeTileVertically);
+            if (ImGui::MenuItem("Tile All Horizontally"))
+                App::Push(Cmd::WindowArrangeTileHorizontally);
+            if (ImGui::MenuItem("Consolidate All to Tabs"))
+                App::Push(Cmd::WindowArrangeConsolidateTabs);
+            if (ImGui::MenuItem("Float in Window"))
+                App::Push(Cmd::WindowArrangeFloatInWindow);
+            if (ImGui::MenuItem("Float All in Windows"))
+                App::Push(Cmd::WindowArrangeFloatAllInWindows);
+            ImGui::EndMenu();
+        }
+
+        // ---- Workspace ----
+        if (ImGui::BeginMenu("Workspace"))
+        {
+            static int ws = 0;   // 0 Essentials, 1 3D, ...
+            if (ImGui::MenuItem("Essentials", nullptr, ws == 0))
+            { ws = 0; App::Push(Cmd::WorkspaceDefault); }
+            if (ImGui::MenuItem("3D", nullptr, ws == 1))
+            { ws = 1; App::Push(Cmd::Workspace3D); }
+            if (ImGui::MenuItem("Graphic and Web", nullptr, ws == 2))
+            { ws = 2; App::Push(Cmd::WorkspaceGraphicWeb); }
+            if (ImGui::MenuItem("Motion", nullptr, ws == 3))
+            { ws = 3; App::Push(Cmd::WorkspaceMotion); }
+            if (ImGui::MenuItem("Painting", nullptr, ws == 4))
+            { ws = 4; App::Push(Cmd::WorkspacePainting); }
+            if (ImGui::MenuItem("Photography", nullptr, ws == 5))
+            { ws = 5; App::Push(Cmd::WorkspacePhotography); }
+            ImGui::Separator();
+            if (ImGui::MenuItem("Reset Current Workspace"))
+                App::Push(Cmd::WorkspaceResetCurrent);
+            if (ImGui::MenuItem("New Workspace..."))
+                App::Push(Cmd::WorkspaceNew);
+            ImGui::EndMenu();
+        }
+
         ImGui::Separator();
-        if (ImGui::MenuItem("Performance", NULL,&Performace)) { /* Performance */ }
-        if (ImGui::MenuItem("Reset Workspace",NULL,&ResetWorkspace)) { /* Reset */ }
-        ImGuiStyle& style = ImGui::GetStyle();
-        style.SeparatorTextBorderSize = 1.0f;
-        ImGui::SeparatorText("ImGui Plugin");
-        if(ImGui::MenuItem("Imgui Demo", NULL, &ImguiDemo)){}
-        if(ImGui::MenuItem("Implot Demo", NULL, &ImplotDemo)){}
-        if(ImGui::MenuItem("Implot3d Demo",NULL,&Implot3dDemo)){}
+
+        // ---- Extensions ----
+        if (ImGui::BeginMenu("Extensions"))
+        {
+            ImGui::TextDisabled("(No extensions installed)");
+            ImGui::EndMenu();
+        }
+
+        ImGui::Separator();
+
+        // ---- Checkable panels ----
+        ImGui::MenuItem("3D", nullptr, &App::Show3D);
+        ImGui::MenuItem("Actions", "Alt+F9", &App::ShowActions);
+        ImGui::MenuItem("Adjustments", nullptr, &App::ShowAdjustments);
+        ImGui::MenuItem("Brush Settings", "F5", &App::ShowBrushSettings);
+        ImGui::MenuItem("Brushes", nullptr, &App::ShowBrushes);
+        ImGui::MenuItem("Channels", nullptr, &App::ShowChannels);
+        ImGui::MenuItem("Character", nullptr, &App::ShowCharacter);
+        ImGui::MenuItem("Color", "F6", &App::ShowColor);
+        ImGui::MenuItem("History", nullptr, &App::ShowHistory);
+        ImGui::MenuItem("Info", "F8", &App::ShowInfo);
+        ImGui::MenuItem("Layers", "F7", &App::ShowLayers);
+        ImGui::MenuItem("Navigator", nullptr, &App::ShowNavigator);
+        ImGui::MenuItem("Paragraph", nullptr, &App::ShowParagraph);
+        ImGui::MenuItem("Properties", nullptr, &App::ShowProperties);
+        ImGui::MenuItem("Paths", nullptr, &App::ShowPaths);
+        ImGui::MenuItem("Swatches", nullptr, &App::ShowSwatches);
+        ImGui::MenuItem("Timeline", nullptr, &App::ShowTimeline);
+        ImGui::MenuItem("Tool Settings", nullptr, &App::ShowToolSettings);
+        ImGui::MenuItem("Viewport / Scene View", nullptr, &App::ShowViewport);
+
+        ImGui::Separator();
+
+        ImGui::MenuItem("Application Frame", nullptr, &App::ApplicationFrame);
+        ImGui::MenuItem("Options", nullptr, &App::ShowOptions);
+        ImGui::MenuItem("Tools", nullptr, &App::ShowTools);
+
         ImGui::EndMenu();
     }
 }
 
 void WindowMenu::DrawWindow()
 {
-    if (Performace)
+    if (App::ShowViewport)
+        ImageViewer::DrawWindow();
+
+    if (App::ShowTools)
     {
-        // Ring-buffer for the last 120 FPS samples
-        static float  fps_history[120] = {};
-        static int    fps_offset = 0;
-        static double fps_refresh_time = 0.0;
-
-        double now = ImGui::GetTime();
-        // Sample up to 60 times per second so the graph scrolls smoothly
-        if (now - fps_refresh_time >= 1.0 / 60.0)
+        ImGui::SetNextWindowSize(ImVec2(220, 320), ImGuiCond_FirstUseEver);
+        if (ImGui::Begin("Tools", &App::ShowTools))
         {
-            fps_history[fps_offset] = ImGui::GetIO().Framerate;
-            fps_offset = (fps_offset + 1) % IM_ARRAYSIZE(fps_history);
-            fps_refresh_time = now;
-        }
-
-        // Ring-buffer for frame time (ms) — same approach
-        static float  ms_history[120] = {};
-        static int    ms_offset = 0;
-        {
-            static double ms_refresh_time = 0.0;
-            if (now - ms_refresh_time >= 1.0 / 60.0)
+            static const char* const tools[] =
             {
-                float framerate = ImGui::GetIO().Framerate;
-                ms_history[ms_offset] = (framerate > 0.f) ? 1000.f / framerate : 0.f;
-                ms_offset = (ms_offset + 1) % IM_ARRAYSIZE(ms_history);
-                ms_refresh_time = now;
+                "Move", "Marquee", "Lasso", "Wand",
+                "Crop", "Eyedropper", "Brush", "Eraser",
+                "Text", "Zoom"
+            };
+            const float w = (ImGui::GetContentRegionAvail().x - ImGui::GetStyle().ItemSpacing.x) * 0.5f;
+            for (int i = 0; i < (int)IM_ARRAYSIZE(tools); ++i)
+            {
+                ImGui::PushID(i);
+                if (ImGui::Selectable(tools[i], false, 0, ImVec2(w, 0)))
+                    App::SetStatus("Tool selected: %s", tools[i]);
+                if ((i & 1) == 0 && i + 1 < (int)IM_ARRAYSIZE(tools))
+                    ImGui::SameLine();
+                ImGui::PopID();
             }
+            ImGui::End();
         }
+    }
 
-        ImGui::SetNextWindowPos(ImVec2(10, 30), ImGuiCond_Always);
-        ImGui::SetNextWindowBgAlpha(0.45f);
-        ImGui::SetNextWindowSize(ImVec2(320, 0), ImGuiCond_Always);
-
-        ImGuiWindowFlags flags =
-            ImGuiWindowFlags_NoMove |
-            ImGuiWindowFlags_NoTitleBar |
-            ImGuiWindowFlags_NoResize |
-            ImGuiWindowFlags_AlwaysAutoResize;
-
-        ImGui::Begin("FPS window", &Performace, flags);
-
-        float currentFPS = ImGui::GetIO().Framerate;
-        float currentMS = (currentFPS > 0.f) ? 1000.f / currentFPS : 0.f;
-
-        // ── FPS coloured text ──────────────────────────────────────────────────
-        ImVec4 fpsColor = (currentFPS >= 55.f) ? ImVec4(0, 1, 0, 1)
-            : (currentFPS >= 30.f) ? ImVec4(1, 1, 0, 1)
-            : ImVec4(1, 0, 0, 1);
-        ImGui::TextColored(fpsColor, "FPS: %.1f", currentFPS);
-        ImGui::SameLine();
-        ImGui::TextDisabled("(%.2f ms)", currentMS);
-
-        // ── FPS PlotLines — the graph follows the real framerate ───────────────
-        ImGui::SeparatorText("FPS History");
+    if (App::ShowLayers)
+    {
+        ImGui::SetNextWindowSize(ImVec2(260, 320), ImGuiCond_FirstUseEver);
+        if (ImGui::Begin("Layers", &App::ShowLayers))
         {
-            float max_fps = 0.0f;
-            float min_fps = FLT_MAX;
-            for (int i = 0; i < 120; i++) {
-                if (fps_history[i] > max_fps) max_fps = fps_history[i];
-                if (fps_history[i] < min_fps) min_fps = fps_history[i];
+            ImGui::TextDisabled("Layer stack (Phase 3)");
+            for (int i = 3; i >= 0; --i)
+            {
+                char label[32];
+                snprintf(label, sizeof(label), "Layer %d", i + 1);
+                if (ImGui::Selectable(label, i == 0))
+                    App::SetStatus("Selected %s", label);
             }
-
-            char overlayFPS[32];
-            snprintf(overlayFPS, sizeof(overlayFPS), "%.0f fps", currentFPS); 
-            ImGui::PlotLines("##fps",
-                fps_history, IM_ARRAYSIZE(fps_history), fps_offset,
-                overlayFPS,
-                FLT_MAX, FLT_MAX,
-                ImVec2(-1, 70));;
+            ImGui::Separator();
+            if (ImGui::SmallButton("New"))
+                App::Push(Cmd::LayerNewLayer);
+            ImGui::SameLine();
+            if (ImGui::SmallButton("Delete"))
+                App::Push(Cmd::LayerDeleteLayer);
+            ImGui::End();
         }
+    }
 
-        // ── Frame-time PlotLines ───────────────────────────────────────────────
-        ImGui::SeparatorText("Frame Time (ms)");
+    if (App::ShowHistory)
+    {
+        ImGui::SetNextWindowSize(ImVec2(220, 200), ImGuiCond_FirstUseEver);
+        if (ImGui::Begin("History", &App::ShowHistory))
         {
-            char overlay[32];
-            snprintf(overlay, sizeof(overlay), "%.0f ms", currentMS);
-            ImGui::PlotLines("##ms",
-                ms_history, IM_ARRAYSIZE(ms_history), ms_offset,
-                overlay,
-                0.0f, 50.0f,           // y-axis: 0 – 50 ms
-                ImVec2(-1, 70));
+            ImGui::TextDisabled("History / Undo stack (Phase 4)");
+            ImGui::TextUnformatted("Initial State");
+            ImGui::TextUnformatted("Open");
+            ImGui::TextUnformatted("Adjustment");
+            ImGui::End();
         }
+    }
 
-        // ── Target budget indicator ────────────────────────────────────────────
-        ImGui::Spacing();
-        ImGui::ProgressBar(currentFPS / 60.f, ImVec2(-1, 8), "");
-        ImGui::TextDisabled("Budget vs 60 fps target");
+    if (App::ShowProperties)
+    {
+        ImGui::SetNextWindowSize(ImVec2(260, 220), ImGuiCond_FirstUseEver);
+        if (ImGui::Begin("Properties", &App::ShowProperties))
+        {
+            if (App::HasDocument())
+            {
+                ImGui::TextUnformatted("Image");
+                ImGui::Separator();
+                ImGui::Text("Name: %s", ImageViewer::FileName().c_str());
+                ImGui::Text("Zoom: %.1f%%", ImageViewer::GetZoom() * 100.0f);
+            }
+            else
+            {
+                ImGui::TextDisabled("Open an image to see properties.");
+            }
+            ImGui::End();
+        }
+    }
+
+    if (App::ShowColor)
+    {
+        ImGui::SetNextWindowSize(ImVec2(260, 220), ImGuiCond_FirstUseEver);
+        if (ImGui::Begin("Color / Swatches", &App::ShowColor))
+        {
+            static ImVec4 fg(1.0f, 1.0f, 1.0f, 1.0f);
+            static ImVec4 bg(0.0f, 0.0f, 0.0f, 1.0f);
+            ImGui::ColorEdit4("Foreground", &fg.x, ImGuiColorEditFlags_NoInputs);
+            ImGui::ColorEdit4("Background", &bg.x, ImGuiColorEditFlags_NoInputs);
+            ImGui::End();
+        }
+    }
+
+    // ---- Generic placeholder panels (template) ----
+    struct Panel { const char* name; bool* visible; };
+    const Panel panels[] =
+    {
+        { "3D",             &App::Show3D },
+        { "Actions",        &App::ShowActions },
+        { "Adjustments",    &App::ShowAdjustments },
+        { "Brush Settings", &App::ShowBrushSettings },
+        { "Brushes",        &App::ShowBrushes },
+        { "Channels",       &App::ShowChannels },
+        { "Character",      &App::ShowCharacter },
+        { "Info",           &App::ShowInfo },
+        { "Navigator",      &App::ShowNavigator },
+        { "Paragraph",      &App::ShowParagraph },
+        { "Paths",          &App::ShowPaths },
+        { "Swatches",       &App::ShowSwatches },
+        { "Timeline",       &App::ShowTimeline },
+        { "Tool Settings",  &App::ShowToolSettings },
+    };
+    for (const Panel& p : panels)
+    {
+        if (!*p.visible)
+            continue;
+        ImGui::SetNextWindowSize(ImVec2(240, 180), ImGuiCond_FirstUseEver);
+        if (ImGui::Begin(p.name, p.visible))
+        {
+            ImGui::TextDisabled("%s panel (template stub)", p.name);
+        }
         ImGui::End();
-
-
     }
-
-
-    if(ImguiDemo)
-    {
-        ImGui::ShowDemoWindow(&ImguiDemo);
-    }
-    if (ImplotDemo)
-    {
-        ImPlot::ShowDemoWindow(&ImplotDemo);
-    }
-    if (Implot3dDemo)
-    {
-        ImPlot3D::ShowDemoWindow(&Implot3dDemo);
-    }
-
 }

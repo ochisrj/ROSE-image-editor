@@ -81,6 +81,9 @@
     <ClCompile Include="menubar.cpp">
       <Filter>Source Files\UIMenu</Filter>
     </ClCompile>
+    <ClCompile Include="appstate.cpp">
+      <Filter>Source Files\UIMenu</Filter>
+    </ClCompile>
     <ClCompile Include="editmenu.cpp">
       <Filter>Source Files\UIMenu</Filter>
     </ClCompile>
@@ -117,10 +120,16 @@
     <ClCompile Include="implot\implot_items.cpp">
       <Filter>Source Files\imgui</Filter>
     </ClCompile>
-    <ClCompile Include="CascadiaCode-Regular.c">
-      <Filter>Header Files\font</Filter>
-    </ClCompile>
     <ClCompile Include="stb.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="camera.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="imageviewer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="statusbar.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -161,6 +170,12 @@
     <ClInclude Include="menubar.h">
       <Filter>Header Files\UIMenu</Filter>
     </ClInclude>
+    <ClInclude Include="appcommands.h">
+      <Filter>Header Files\UIMenu</Filter>
+    </ClInclude>
+    <ClInclude Include="appstate.h">
+      <Filter>Header Files\UIMenu</Filter>
+    </ClInclude>
     <ClInclude Include="editmenu.h">
       <Filter>Header Files\UIMenu</Filter>
     </ClInclude>
@@ -197,6 +212,18 @@
     <ClInclude Include="cascadiafont.h">
       <Filter>Header Files\font</Filter>
     </ClInclude>
+    <ClInclude Include="camera.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="imageviewer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="statusbar.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="googlesan.h">
+      <Filter>Header Files\font</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="..\..\..\..\OneDrive\Pictures\Picture\56946.jpg">
@@ -205,5 +232,8 @@
     <Image Include="personalimag.png">
       <Filter>Resource Files\image</Filter>
     </Image>
+  </ItemGroup>
+  <ItemGroup>
+    <Font Include="GoogleSans.ttf" />
   </ItemGroup>
 </Project>

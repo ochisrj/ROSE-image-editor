@@ -1,39 +1,61 @@
 ﻿#include "menubar.h"
 
 #include "imgui.h"
-#include "imgui_impl_glfw.h"
-#include "imgui_impl_opengl3.h"
-
-#include <iostream>
+#include "appstate.h"
+#include "appcommands.h"
+#include "statusbar.h"
 
 void MenuBar::Draw(GLFWwindow* window)
-{	
-	// Main Menu Bar
-	if (ImGui::BeginMainMenuBar())
-	{	
-		FileMenu::DrawMenu(window);
-		EditMenu::DrawMenu();
-		ViewMenu::DrawMenu();
-		ImageMenu::DrawMenu();
-		LayerMenu::DrawMenu();	
-		SelectMenu::DrawMenu();
-		FilterMenu::DrawMenu();
-		WindowMenu::DrawMenu();
-		HelpMenu::DrawMenu();
-		ImGuiIO& io = ImGui::GetIO();
-		ImGui::Text("| %.1f FPS", io.Framerate);
-		ImGui::EndMainMenuBar();
-	}
+{
+    RenderMainMenuBar(window);
+    StatusBar::ReserveBottomSpace();
+    RenderMenuWindows();
+    App::HandleGlobalShortcuts();
+    App::Dispatch();
+    StatusBar::Draw();
+}
 
-	// Menu Windows
-	FileMenu::DrawWindow();
-	EditMenu::DrawWindow();
-	ViewMenu::DrawWindow();
-	ImageMenu::DrawWindow();
-	LayerMenu::DrawWindow();
-	SelectMenu::DrawWindow();
-	FilterMenu::DrawWindow();
-	WindowMenu::DrawWindow();
-	HelpMenu::DrawWindow();
+void MenuBar::RenderMainMenuBar(GLFWwindow* window)
+{
+    if (ImGui::BeginMainMenuBar())
+    {
+        FileMenu::DrawMenu(window);
+        EditMenu::DrawMenu();
+        ImageMenu::DrawMenu();
+        LayerMenu::DrawMenu();
+        SelectMenu::DrawMenu();
+        FilterMenu::DrawMenu();
+        ViewMenu::DrawMenu();
+        WindowMenu::DrawMenu();
+        HelpMenu::DrawMenu();
 
+        // Right-aligned status / FPS readout.
+        if (!App::Status.empty())
+        {
+            ImGui::SameLine(0.0f, 0.0f);
+            ImGui::SetCursorPosX(ImGui::GetWindowWidth() - 260.0f);
+            ImGui::TextUnformatted(App::Status.c_str());
+        }
+        //if (App::PrefShowFps)
+        //{
+        //    ImGui::SameLine(0.0f, 0.0f);
+        //    ImGui::SetCursorPosX(ImGui::GetWindowWidth() - 70.0f);
+        //    ImGui::TextDisabled("| %.1f FPS", ImGui::GetIO().Framerate);
+        //}
+
+        ImGui::EndMainMenuBar();
+    }
+}
+
+void MenuBar::RenderMenuWindows()
+{
+    FileMenu::DrawWindow();
+    EditMenu::DrawWindow();
+    ImageMenu::DrawWindow();
+    LayerMenu::DrawWindow();
+    SelectMenu::DrawWindow();
+    FilterMenu::DrawWindow();
+    ViewMenu::DrawWindow();
+    WindowMenu::DrawWindow();
+    HelpMenu::DrawWindow();
 }

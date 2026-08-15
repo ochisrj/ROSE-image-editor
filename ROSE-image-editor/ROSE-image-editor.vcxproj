@@ -150,7 +150,7 @@
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="CascadiaCode-Regular.c" />
+    <ClCompile Include="appstate.cpp" />
     <ClCompile Include="camera.cpp" />
     <ClCompile Include="editmenu.cpp" />
     <ClCompile Include="filemenu.cpp" />
@@ -178,15 +178,19 @@
     <ClCompile Include="menubar.cpp" />
     <ClCompile Include="selectmenu.cpp" />
     <ClCompile Include="stb.cpp" />
+    <ClCompile Include="statusbar.cpp" />
     <ClCompile Include="viewmenu.cpp" />
     <ClCompile Include="windowmenu.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="appcommands.h" />
+    <ClInclude Include="appstate.h" />
     <ClInclude Include="camera.h" />
     <ClInclude Include="cascadiafont.h" />
     <ClInclude Include="editmenu.h" />
     <ClInclude Include="filemenu.h" />
     <ClInclude Include="filtermenu.h" />
+    <ClInclude Include="googlesan.h" />
     <ClInclude Include="helpmenu.h" />
     <ClInclude Include="imagemenu.h" />
     <ClInclude Include="imageviewer.h" />
@@ -206,12 +210,16 @@
     <ClInclude Include="layermenu.h" />
     <ClInclude Include="menubar.h" />
     <ClInclude Include="selectmenu.h" />
+    <ClInclude Include="statusbar.h" />
     <ClInclude Include="viewmenu.h" />
     <ClInclude Include="windowmenu.h" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="..\..\..\..\OneDrive\Pictures\Picture\56946.jpg" />
     <Image Include="personalimag.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Font Include="GoogleSans.ttf" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

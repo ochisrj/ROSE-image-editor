@@ -1,8 +1,5 @@
 #pragma once
 
-#include <iostream>
-#include "imgui.h"
-
 #include "filemenu.h"
 #include "editmenu.h"
 #include "Imagemenu.h"
@@ -13,11 +10,14 @@
 #include "windowmenu.h"
 #include "helpmenu.h"
 
-
 struct GLFWwindow;
 
 class MenuBar
 {
 public:
-	static void Draw(GLFWwindow* window);
+    // Full menu bar pipeline: draw menus, draw menu-owned windows/dialogs,
+    // process global shortcuts and dispatch pending commands.
+    static void Draw(GLFWwindow* window);
+    static void RenderMainMenuBar(GLFWwindow* window);
+    static void RenderMenuWindows();
 };

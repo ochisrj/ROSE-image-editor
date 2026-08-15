@@ -1,89 +1,138 @@
-#include <glad/glad.h>
-#include <GLFW/glfw3.h>
-
-#include <iostream>
-
-#include "imgui.h"
-#include "imgui_impl_glfw.h"
-#include "imgui_impl_opengl3.h"
-#include "implot.h"
-#include "implot3d.h"
-#include "implot_internal.h"
-#include "implot3d_internal.h"
-
 #include "viewmenu.h"
 
-bool ViewMenu::ZoomIn = false;
-bool ViewMenu::ZoomOut = false;
-bool ViewMenu::FitOnScreen = false;
-bool ViewMenu::Toolbar = false;
-bool ViewMenu::ToolOption = false;
-bool ViewMenu::Panels = false;
-bool ViewMenu::TabMenu = false;
-bool ViewMenu::Workspace = false;
-bool ViewMenu::Rulers = false;
-bool ViewMenu::Grid = false;
-bool ViewMenu::Snap = false;
+#include "imgui.h"
+#include "appstate.h"
+#include "appcommands.h"
 
 void ViewMenu::DrawMenu()
 {
     if (ImGui::BeginMenu("View"))
     {
-        if (ImGui::MenuItem("Zoom In", "Ctrl+=",&ZoomIn)) { /* Zoom In */ }
-        if (ImGui::MenuItem("Zoom Out", "Ctrl+-",&ZoomOut)) { /* Zoom Out */ }
-        if (ImGui::MenuItem("Fit on Screen", "Ctrl+0",&FitOnScreen)) { /* Fit */ }
+        // ---- Proof Setup ----
+        if (ImGui::BeginMenu("Proof Setup"))
+        {
+            static int proof = 0;   // 0 = Custom, 1 = Working CMYK, ...
+            if (ImGui::MenuItem("Custom...", nullptr, proof == 0))
+            { proof = 0; App::Push(Cmd::ViewProofSetupCustom); }
+            if (ImGui::MenuItem("Working CMYK", nullptr, proof == 1))
+            { proof = 1; App::Push(Cmd::ViewProofSetupWorkingCMYK); }
+            if (ImGui::MenuItem("Macintosh RGB", nullptr, proof == 2))
+            { proof = 2; App::Push(Cmd::ViewProofSetupMacintoshRGB); }
+            if (ImGui::MenuItem("Internet Standard RGB (sRGB)", nullptr, proof == 3))
+            { proof = 3; App::Push(Cmd::ViewProofSetupInternetStandardRGB); }
+            ImGui::EndMenu();
+        }
+        if (ImGui::MenuItem("Proof Colors", "Ctrl+Y", &App::ShowProofColors))
+            App::Push(Cmd::ViewProofColors);
+        if (ImGui::MenuItem("Gamut Warning", "Shift+Ctrl+Y", &App::ShowGamutWarning))
+            App::Push(Cmd::ViewGamutWarning);
+
         ImGui::Separator();
-        if(ImGui::MenuItem("Toolbar",NULL,&Toolbar)){}
-        if(ImGui::MenuItem("Tool Opetion",NULL,&ToolOption)){}
-        if(ImGui::MenuItem("Panels",NULL,&Panels)){}
-        if(ImGui::MenuItem("Tab Menu",NULL,&TabMenu)){}
-        if(ImGui::MenuItem("Workspace",NULL,&Workspace)){}
+
+        // ---- Pixel Aspect Ratio ----
+        if (ImGui::BeginMenu("Pixel Aspect Ratio"))
+        {
+            static int par = 0;
+            if (ImGui::MenuItem("Square", nullptr, par == 0))
+            { par = 0; App::Push(Cmd::ViewPixelAspectRatioSquare); }
+            if (ImGui::MenuItem("D1 VTS Aspect", nullptr, par == 1))
+            { par = 1; App::Push(Cmd::ViewPixelAspectRatioD1VTSAspect); }
+            if (ImGui::MenuItem("D1 PAL", nullptr, par == 2))
+            { par = 2; App::Push(Cmd::ViewPixelAspectRatioD1PAL); }
+            if (ImGui::MenuItem("HDV 1080", nullptr, par == 3))
+            { par = 3; App::Push(Cmd::ViewPixelAspectRatioHDV1080); }
+            ImGui::EndMenu();
+        }
+        if (ImGui::MenuItem("Pixel Aspect Ratio Reset"))
+            App::Push(Cmd::ViewPixelAspectRatioReset);
+
         ImGui::Separator();
-        if (ImGui::MenuItem("Rulers", "Ctrl+R",&Rulers)) { /* Rulers */ }
-        if (ImGui::MenuItem("Grid", "Ctrl+'",&Grid)) { /* Grid */ }
-        if (ImGui::MenuItem("Snap", "Ctrl+Shift+;",&Snap)) { /* Snap */ }
+
+        // ---- Zoom ----
+        if (ImGui::MenuItem("Zoom In", "Ctrl++"))
+            App::Push(Cmd::ViewZoomIn);
+        if (ImGui::MenuItem("Zoom Out", "Ctrl+-"))
+            App::Push(Cmd::ViewZoomOut);
+        if (ImGui::MenuItem("Fit on Screen", "Ctrl+0"))
+            App::Push(Cmd::ViewFitScreen);
+        if (ImGui::MenuItem("100% / Actual Pixels", "Ctrl+1"))
+            App::Push(Cmd::ViewActualPixels);
+        if (ImGui::MenuItem("Print Size"))
+            App::Push(Cmd::ViewPrintSize);
+
+        ImGui::Separator();
+
+        // ---- Screen Mode ----
+        if (ImGui::BeginMenu("Screen Mode"))
+        {
+            static int screen = 0;
+            if (ImGui::MenuItem("Standard Screen Mode", nullptr, screen == 0))
+            { screen = 0; App::ScreenMode = 0; App::Push(Cmd::ViewScreenModeStandard); }
+            if (ImGui::MenuItem("Full Screen Mode With Menu Bar", "F", screen == 1))
+            { screen = 1; App::ScreenMode = 1; App::Push(Cmd::ViewScreenModeFullWithMenu); }
+            if (ImGui::MenuItem("Full Screen Mode", "F", screen == 2))
+            { screen = 2; App::ScreenMode = 2; App::Push(Cmd::ViewScreenModeFull); }
+            ImGui::EndMenu();
+        }
+
+        ImGui::Separator();
+
+        // ---- Show ----
+        if (ImGui::BeginMenu("Show"))
+        {
+            ImGui::MenuItem("Target Path", nullptr, &App::ShowTargetPath);
+            ImGui::MenuItem("Grid", "Ctrl+'", &App::ShowGrid);
+            ImGui::MenuItem("Guides", "Ctrl+;", &App::ShowGuides);
+            ImGui::MenuItem("Canvas Guides", nullptr, &App::ShowCanvasGuides);
+            ImGui::MenuItem("Rulers", "Ctrl+R", &App::ShowRulers);
+            ImGui::MenuItem("Pixel Grid", nullptr, &App::ShowPixelGrid);
+            ImGui::MenuItem("Layer Edges", nullptr, &App::ShowLayerEdges);
+            ImGui::MenuItem("Selection Edges", "Ctrl+H", &App::ShowSelectionEdges);
+            ImGui::EndMenu();
+        }
+
+        // ---- Snap / Snap To ----
+        if (ImGui::MenuItem("Snap", "Shift+Ctrl+;", &App::SnapEnabled))
+            App::Push(Cmd::ViewSnap);
+
+        if (ImGui::BeginMenu("Snap To"))
+        {
+            if (ImGui::MenuItem("Guides", nullptr, &App::SnapToGuides))
+                App::Push(Cmd::ViewSnapToGuides);
+            if (ImGui::MenuItem("Grid", nullptr, &App::SnapToGrid))
+                App::Push(Cmd::ViewSnapToGrid);
+            if (ImGui::MenuItem("Layers", nullptr, &App::SnapToLayers))
+                App::Push(Cmd::ViewSnapToLayers);
+            if (ImGui::MenuItem("Slices", nullptr, &App::SnapToSlices))
+                App::Push(Cmd::ViewSnapToSlices);
+            if (ImGui::MenuItem("Document Bounds", nullptr, &App::SnapToDocumentBounds))
+                App::Push(Cmd::ViewSnapToDocumentBounds);
+            ImGui::Separator();
+            if (ImGui::MenuItem("All", nullptr, false, false))
+                App::Push(Cmd::ViewSnapToAll);
+            if (ImGui::MenuItem("None", nullptr, false, false))
+                App::Push(Cmd::ViewSnapToNone);
+            ImGui::EndMenu();
+        }
+
+        // ---- Guides ----
+        if (ImGui::BeginMenu("Guides"))
+        {
+            if (ImGui::MenuItem("New Guide..."))
+                App::Push(Cmd::ViewGuideNew);
+            if (ImGui::MenuItem("New Guide Layout..."))
+                App::Push(Cmd::ViewGuideNewLayout);
+            if (ImGui::MenuItem("Lock Guides", "Alt+Ctrl+;", &App::GuidesLocked))
+                App::Push(Cmd::ViewGuideLockGuides);
+            if (ImGui::MenuItem("Clear Guides", nullptr, false, false))
+                App::Push(Cmd::ViewGuideClearGuides);
+            ImGui::EndMenu();
+        }
+
         ImGui::EndMenu();
     }
 }
 
 void ViewMenu::DrawWindow()
 {
-    if (Toolbar)
-    {
-        ImGuiWindowFlags WindowFlag = ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoScrollbar;
-        if (ImGui::Begin("workspace",&Toolbar,WindowFlag))
-        {
-            float itemWidth = 50.f;
-            float itemHeight = 50.f;
-            float spacing = 8.f;
-
-            // Fetch width available in the current window viewport
-            float windowVisibleX2 = ImGui::GetWindowPos().x + ImGui::GetContentRegionAvail().x;
-
-            for (int i = 0; i < 10; i++)
-            {
-                ImGui::PushID(i);
-
-                // Draw your grid item (e.g., custom image button or sub-menu box)
-                ImGui::Button("Cell", ImVec2(itemWidth, itemHeight));
-
-                // Calculate position bounds for wrapping
-                float lastItemX2 = ImGui::GetItemRectMax().x;
-                float nextItemX2 = lastItemX2 + spacing + itemWidth;
-
-                if (i + 1 < 20 && nextItemX2 < windowVisibleX2)
-                    ImGui::SameLine(0.0f, spacing); // Stay on same horizontal line
-
-                ImGui::PopID();
-            }
-
-            ImGui::End();
-        }
-    }
-
-    if (Workspace)
-    {
-    
-
-    }
 }

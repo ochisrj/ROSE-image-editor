@@ -10,6 +10,8 @@
 
 #include "imageviewer.h"
 
+#include "appstate.h"
+
 #include <chrono>
 #include <cmath>
 #include <cstdarg>
@@ -30,6 +32,8 @@ int           ImageViewer::s_Channels = 0;
 float         ImageViewer::s_Zoom = 1.0f;
 float         ImageViewer::s_PanX = 0.0f;
 float         ImageViewer::s_PanY = 0.0f;
+float         ImageViewer::s_CanvasW = 0.0f;
+float         ImageViewer::s_CanvasH = 0.0f;
 bool          ImageViewer::s_Dragging = false;
 double        ImageViewer::s_DecodeMs = 0.0;
 double        ImageViewer::s_UploadMs = 0.0;
@@ -246,6 +250,82 @@ void ImageViewer::Shutdown()
     s_Visible = false;
 }
 
+bool ImageViewer::OpenFileDialog()
+{
+    std::string path;
+    if (!PickFile(path))
+        return false;
+    LoadFile(path);
+    return true;
+}
+
+void ImageViewer::LoadFile(const std::string& path)
+{
+    if (path.empty())
+        return;
+    App::AddRecent(path);
+    RequestLoad(path);
+    s_Visible = true;
+}
+
+void ImageViewer::ZoomIn()
+{
+    s_Zoom = fminf(32.0f, fmaxf(0.02f, s_Zoom * 1.25f));
+}
+
+void ImageViewer::ZoomOut()
+{
+    s_Zoom = fminf(32.0f, fmaxf(0.02f, s_Zoom / 1.25f));
+}
+
+void ImageViewer::FitScreen()
+{
+    if (!HasImage() || s_CanvasW <= 0.0f || s_CanvasH <= 0.0f)
+        return;
+    const float scaleX = s_CanvasW / (float)s_Width;
+    const float scaleY = s_CanvasH / (float)s_Height;
+    s_Zoom = fminf(32.0f, fmaxf(0.02f, fminf(scaleX, scaleY)));
+    s_PanX = 0.0f;
+    s_PanY = 0.0f;
+}
+
+void ImageViewer::ActualPixels()
+{
+    s_Zoom = 1.0f;
+}
+
+void ImageViewer::ResetView()
+{
+    s_Zoom = 1.0f;
+    s_PanX = 0.0f;
+    s_PanY = 0.0f;
+}
+
+bool ImageViewer::HasImage()
+{
+    return s_Texture != 0 && s_Width > 0 && s_Height > 0;
+}
+
+const std::string& ImageViewer::FileName()
+{
+    return s_FileName;
+}
+
+float ImageViewer::GetZoom()
+{
+    return s_Zoom;
+}
+
+int ImageViewer::GetImageWidth()
+{
+    return s_Width;
+}
+
+int ImageViewer::GetImageHeight()
+{
+    return s_Height;
+}
+
 void ImageViewer::DrawWindow()
 {
     PollLoadResult();
@@ -298,6 +378,8 @@ void ImageViewer::DrawWindow()
     ImVec2 canvasSize(region.x, region.y - infoHeight);
     if (canvasSize.x < 1.0f) canvasSize.x = 1.0f;
     if (canvasSize.y < 1.0f) canvasSize.y = 1.0f;
+    s_CanvasW = canvasSize.x;
+    s_CanvasH = canvasSize.y;
 
     // --- Canvas ---
     ImGui::BeginChild("##canvas", canvasSize, ImGuiChildFlags_Borders, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoMove);

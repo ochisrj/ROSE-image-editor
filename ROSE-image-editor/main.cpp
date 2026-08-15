@@ -6,9 +6,11 @@
 #include "implot3d.h"
 //#include "stb_image.h"
 #include "cascadiafont.h"
+#include "googlesan.h"
 #include "menubar.h"
 #include "camera.h"
 #include "imageviewer.h"
+
 
 #include <opencv2/core/utils/logger.hpp>
 
@@ -21,77 +23,13 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include <string>
+#include <cmath>
 
 // Shader sources
 const char* vertexShaderSource = "#version 330 core\n layout (location = 0) in vec3 aPos;\n void main() { gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0); }\0";
 const char* fragmentShaderSource = "#version 330 core\n out vec4 FragColor;\n void main() { FragColor = vec4(0.8f, 0.3f, 0.02f, 1.0f); }\n\0";
 
-void DrawCameraWindow()
-{
-    static Camera camera;
-    static std::vector<std::string> devices;
-    static int selected = 0;
-    static bool refresh = true;
 
-    if (refresh)
-    {
-        devices = Camera::DetectDevices();
-        refresh = false;
-    }
-
-    if (ImGui::Begin("Camera"))
-    {
-        if (ImGui::BeginCombo("Device", selected < (int)devices.size() ? devices[selected].c_str() : "None"))
-        {
-            for (int i = 0; i < (int)devices.size(); ++i)
-            {
-                const bool isSelected = (selected == i);
-                if (ImGui::Selectable(devices[i].c_str(), isSelected))
-                    selected = i;
-                if (isSelected)
-                    ImGui::SetItemDefaultFocus();
-            }
-            ImGui::EndCombo();
-        }
-
-        ImGui::SameLine();
-        if (ImGui::Button("Refresh"))
-            refresh = true;
-
-        ImGui::SameLine();
-        if (!camera.IsOpen())
-        {
-            if (ImGui::Button("Start"))
-                camera.Open(selected);
-        }
-        else
-        {
-            if (ImGui::Button("Stop"))
-                camera.Close();
-        }
-
-        ImGui::SameLine();
-        ImGui::Text(camera.IsOpen() ? "Streaming" : "Off");
-
-        if (camera.IsOpen())
-        {
-            camera.Update();
-
-            const ImVec2 avail = ImGui::GetContentRegionAvail();
-            const float aspect = camera.GetWidth() > 0 && camera.GetHeight() > 0
-                ? (float)camera.GetWidth() / (float)camera.GetHeight() : 1.0f;
-
-            ImVec2 size = avail;
-            if (size.y * aspect < size.x)
-                size.x = size.y * aspect;
-            else
-                size.y = size.x / aspect;
-
-            ImGui::Image((ImTextureID)(intptr_t)camera.GetTextureID(), size);
-        }
-    }
-    ImGui::End();
-}
 
 int main()
 {
@@ -109,7 +47,7 @@ int main()
     if (window == NULL) { glfwTerminate(); return -1; }
     glfwMakeContextCurrent(window);
     gladLoadGL();
-    glfwSwapInterval(0);
+    glfwSwapInterval(1);
     glViewport(0, 0, width, height);
 
     // --- Shader & Buffer Setup ---
@@ -151,6 +89,17 @@ int main()
     ImFontConfig font_cfg;
     font_cfg.FontDataOwnedByAtlas = false;
     io.Fonts->AddFontFromMemoryTTF(cascadia, cascadiasize, 16.0f, &font_cfg, io.Fonts->GetGlyphRangesThai());
+    
+    //ImFont* thaiFont = io.Fonts->AddFontFromFileTTF(
+    //    cascadia,
+    //    16.0f,
+    //    nullptr,
+    //    io.Fonts->GetGlyphRangesThai()
+    //);
+
+    //io.Fonts->Build();
+    
+
 
     // Main while loop
     while (!glfwWindowShouldClose(window))
@@ -167,10 +116,9 @@ int main()
         ImGui_ImplOpenGL3_NewFrame();
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();  
-        
-        //DrawCameraWindow();
-        
+
         MenuBar::Draw(window);
+
 
         ImGui::Render();
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());

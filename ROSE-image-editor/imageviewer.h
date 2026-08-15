@@ -12,6 +12,21 @@ public:
     static void SetVisible(bool visible);
     static void Shutdown();
 
+    static bool OpenFileDialog();
+    static void LoadFile(const std::string& path);
+
+    static void ZoomIn();
+    static void ZoomOut();
+    static void FitScreen();
+    static void ActualPixels();
+    static void ResetView();
+
+    static bool HasImage();
+    static const std::string& FileName();
+    static float GetZoom();
+    static int   GetImageWidth();
+    static int   GetImageHeight();
+
 private:
     struct PendingImage
     {
@@ -41,6 +56,8 @@ private:
     static float         s_Zoom;
     static float         s_PanX;
     static float         s_PanY;
+    static float         s_CanvasW;
+    static float         s_CanvasH;
     static bool          s_Dragging;
     static double        s_DecodeMs;
     static double        s_UploadMs;
