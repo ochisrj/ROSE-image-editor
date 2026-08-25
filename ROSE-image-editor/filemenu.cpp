@@ -8,7 +8,7 @@
 #include "imgui.h"
 #include "appstate.h"
 #include "appcommands.h"
-#include "imageviewer.h"
+#include "workspace.h"
 
 void FileMenu::DrawMenu(GLFWwindow* window)
 {
@@ -42,7 +42,7 @@ void FileMenu::DrawMenu(GLFWwindow* window)
                     const std::string name = std::filesystem::path(path).filename().string();
                     if (ImGui::MenuItem(name.c_str()))
                     {
-                        ImageViewer::LoadFile(path);
+                        Workspace::LoadFile(path);
                         App::AddRecent(path);
                         App::SetStatus("Opened %s", name.c_str());
                     }

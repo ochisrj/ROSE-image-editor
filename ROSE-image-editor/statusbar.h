@@ -19,7 +19,7 @@ class StatusBar
 {
 public:
     // Full pipeline: reserve space, then draw the bar itself.
-    static void Draw();
+    static void RenderStatusBar();
 
     // Shrink the main viewport work area so the central content does not
     // extend underneath the status bar.

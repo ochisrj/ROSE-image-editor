@@ -126,7 +126,10 @@
     <ClCompile Include="camera.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="imageviewer.cpp">
+    <ClCompile Include="workspace.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="rulerscale.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="statusbar.cpp">
@@ -215,14 +218,17 @@
     <ClInclude Include="camera.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="imageviewer.h">
+    <ClInclude Include="workspace.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="statusbar.h">
+    <ClInclude Include="rulerscale.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="googlesan.h">
       <Filter>Header Files\font</Filter>
+    </ClInclude>
+    <ClInclude Include="statusbar.h">
+      <Filter>Resource Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

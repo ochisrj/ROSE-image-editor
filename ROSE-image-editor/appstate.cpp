@@ -7,7 +7,7 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
-#include "imageviewer.h"
+#include "workspace.h"
 
 namespace App
 {
@@ -34,8 +34,8 @@ namespace App
     bool ShowInfo        = false;
 
     bool ShowGrid        = false;
-    bool ShowRulers      = false;
-    bool ShowGuides      = false;
+    bool ShowRulers      = true;
+    bool ShowGuides      = true;
     bool ShowTargetPath  = false;
     bool ShowCanvasGuides = false;
     bool ShowPixelGrid   = false;
@@ -101,7 +101,7 @@ namespace App
 
     void Push(Cmd cmd) { s_PendingCommands.push_back(cmd); }
 
-    bool HasDocument()   { return ImageViewer::HasImage(); }
+    bool HasDocument()   { return Workspace::HasImage(); }
     bool HasSelection()  { return false; }
 
     // MUST stay in the exact same order as the Cmd enum in appcommands.h.
@@ -310,10 +310,13 @@ namespace App
         // ---- File ----
         case Cmd::FileNew:      ShowNewDocument = true; break;
         case Cmd::FileOpen:
-            if (ImageViewer::OpenFileDialog())
-                SetStatus("Opened %s", ImageViewer::FileName().c_str());
+            if (Workspace::OpenFileDialog())
+                SetStatus("Opened %s", Workspace::FileName().c_str());
             break;
         case Cmd::FileExit:     if (s_Window) glfwSetWindowShouldClose(s_Window, GLFW_TRUE); break;
+        case Cmd::FileClose:    Workspace::CloseActive(); break;
+        case Cmd::FileCloseAll: Workspace::CloseAllImages(); break;
+        case Cmd::FileCloseAndGoToBridge: Workspace::CloseActive(); break;
 
         // ---- Edit ----
         case Cmd::EditPreferencesGeneral:     ShowPreferences = true; PrefTab = 0; break;
@@ -323,14 +326,19 @@ namespace App
         case Cmd::EditPreferencesUnitsRulers: ShowPreferences = true; PrefTab = 4; break;
 
         // ---- View ----
-        case Cmd::ViewZoomIn:       ImageViewer::ZoomIn(); break;
-        case Cmd::ViewZoomOut:      ImageViewer::ZoomOut(); break;
-        case Cmd::ViewFitScreen:    ImageViewer::FitScreen(); break;
-        case Cmd::ViewActualPixels: ImageViewer::ActualPixels(); break;
+        case Cmd::ViewZoomIn:       Workspace::ZoomIn(); break;
+        case Cmd::ViewZoomOut:      Workspace::ZoomOut(); break;
+        case Cmd::ViewFitScreen:    Workspace::FitScreen(); break;
+        case Cmd::ViewActualPixels: Workspace::ActualPixels(); break;
         case Cmd::ViewShowGrid:     ShowGrid = !ShowGrid; break;
         case Cmd::ViewShowRulers:   ShowRulers = !ShowRulers; break;
         case Cmd::ViewShowGuides:   ShowGuides = !ShowGuides; break;
         case Cmd::ViewSnap:         SnapEnabled = !SnapEnabled; break;
+        case Cmd::ViewGuideNew:     Workspace::OpenAddGuideDialog(); break;
+        case Cmd::ViewGuideClearGuides:
+            Workspace::ClearAllGuides();
+            SetStatus("Guides cleared.");
+            break;
         case Cmd::ViewGuideLockGuides: GuidesLocked = !GuidesLocked; break;
 
         // ---- Window panels / toggles ----
@@ -509,11 +517,18 @@ namespace App
     {
         ImGuiIO& io = ImGui::GetIO();
 
-        // Never steal text input or keys owned by an active widget.
-        if (io.WantTextInput || io.WantCaptureKeyboard)
-            return;
-        // Skip while a menu or modal popup is open (menu items already handle it).
-        if (ImGui::IsPopupOpen(nullptr, ImGuiPopupFlags_AnyPopupId))
+        // Global shortcuts must fire regardless of which window is focused or
+        // which popup/menu is open. The ONLY thing we must never steal from is
+        // an active text-input widget (e.g. typing a guide position), so check
+        // WantTextInput and nothing else.
+        //
+        // NOTE: io.WantCaptureKeyboard is NOT a valid gate here - it is true
+        // whenever the mouse hovers over ANY ImGui window, and since the menu
+        // bar, workspace and status bar cover the whole screen it is true in
+        // virtually every frame, which previously made every global shortcut
+        // dead. Same for ImGui::IsPopupOpen(): an open menu must not swallow
+        // the bindings either.
+        if (io.WantTextInput)
             return;
 
         int count = 0;

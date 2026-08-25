@@ -77,19 +77,24 @@ void ViewMenu::DrawMenu()
 
         ImGui::Separator();
 
-        // ---- Show ----
+        // ---- Workspace display toggles ----
         if (ImGui::BeginMenu("Show"))
         {
             ImGui::MenuItem("Target Path", nullptr, &App::ShowTargetPath);
-            ImGui::MenuItem("Grid", "Ctrl+'", &App::ShowGrid);
-            ImGui::MenuItem("Guides", "Ctrl+;", &App::ShowGuides);
             ImGui::MenuItem("Canvas Guides", nullptr, &App::ShowCanvasGuides);
-            ImGui::MenuItem("Rulers", "Ctrl+R", &App::ShowRulers);
             ImGui::MenuItem("Pixel Grid", nullptr, &App::ShowPixelGrid);
             ImGui::MenuItem("Layer Edges", nullptr, &App::ShowLayerEdges);
             ImGui::MenuItem("Selection Edges", "Ctrl+H", &App::ShowSelectionEdges);
             ImGui::EndMenu();
         }
+
+        ImGui::Separator();
+
+        // ---- Workspace overlays (main-menu toggles mirror the global
+        //      shortcuts: Ctrl+R, Ctrl+' and Ctrl+;) ----
+        ImGui::MenuItem("Rulers", "Ctrl+R", &App::ShowRulers);
+        ImGui::MenuItem("Grid", "Ctrl+'", &App::ShowGrid);
+        ImGui::MenuItem("Guides", "Ctrl+;", &App::ShowGuides);
 
         // ---- Snap / Snap To ----
         if (ImGui::MenuItem("Snap", "Shift+Ctrl+;", &App::SnapEnabled))
@@ -116,15 +121,15 @@ void ViewMenu::DrawMenu()
         }
 
         // ---- Guides ----
-        if (ImGui::BeginMenu("Guides"))
+        if (ImGui::BeginMenu("Guides##submenu"))
         {
-            if (ImGui::MenuItem("New Guide..."))
+            if (ImGui::MenuItem("Add Guide..."))
                 App::Push(Cmd::ViewGuideNew);
             if (ImGui::MenuItem("New Guide Layout..."))
                 App::Push(Cmd::ViewGuideNewLayout);
             if (ImGui::MenuItem("Lock Guides", "Alt+Ctrl+;", &App::GuidesLocked))
                 App::Push(Cmd::ViewGuideLockGuides);
-            if (ImGui::MenuItem("Clear Guides", nullptr, false, false))
+            if (ImGui::MenuItem("Clear Guides", nullptr, false, App::HasDocument()))
                 App::Push(Cmd::ViewGuideClearGuides);
             ImGui::EndMenu();
         }

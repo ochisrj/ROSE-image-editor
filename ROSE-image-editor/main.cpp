@@ -9,10 +9,9 @@
 #include "googlesan.h"
 #include "menubar.h"
 #include "camera.h"
-#include "imageviewer.h"
+#include "workspace.h"
 
 
-#include <opencv2/core/utils/logger.hpp>
 
 #include <stack>
 #include <vector>
@@ -28,6 +27,13 @@
 // Shader sources
 const char* vertexShaderSource = "#version 330 core\n layout (location = 0) in vec3 aPos;\n void main() { gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0); }\0";
 const char* fragmentShaderSource = "#version 330 core\n out vec4 FragColor;\n void main() { FragColor = vec4(0.8f, 0.3f, 0.02f, 1.0f); }\n\0";
+
+// Keep glViewport in sync with the actual (framebuffer) window size so the
+// background triangle always fills the whole window and stays centered.
+static void FramebufferSizeCallback(GLFWwindow* /*window*/, int width, int height)
+{
+    glViewport(0, 0, width, height);
+}
 
 
 
@@ -48,9 +54,10 @@ int main()
     glfwMakeContextCurrent(window);
     gladLoadGL();
     glfwSwapInterval(1);
+    glfwSetFramebufferSizeCallback(window, FramebufferSizeCallback);
     glViewport(0, 0, width, height);
 
-    // --- Shader & Buffer Setup ---
+    // --- Shader & Buffer Setup (direct-to-backbuffer background triangle) ---
     GLuint vertexShader = glCreateShader(GL_VERTEX_SHADER);
     glShaderSource(vertexShader, 1, &vertexShaderSource, NULL);
     glCompileShader(vertexShader);
@@ -107,7 +114,9 @@ int main()
         glClearColor(0.45f, 0.55f, 0.60f, 1.00f);
         glClear(GL_COLOR_BUFFER_BIT);
 
-        // Draw background triangle
+        // Draw the background triangle directly into the window framebuffer.
+        // glViewport is kept up to date by FramebufferSizeCallback on resize,
+        // so the triangle always fills the window and stays centered.
         glUseProgram(shaderProgram);
         glBindVertexArray(VAO);
         glDrawArrays(GL_TRIANGLES, 0, 3);
@@ -115,7 +124,7 @@ int main()
         // --- Start ImGui Frame ---
         ImGui_ImplOpenGL3_NewFrame();
         ImGui_ImplGlfw_NewFrame();
-        ImGui::NewFrame();  
+        ImGui::NewFrame();
 
         MenuBar::Draw(window);
 
@@ -127,7 +136,7 @@ int main()
     }
 
     // Cleanup
-    ImageViewer::Shutdown();
+    Workspace::Shutdown();
     ImGui_ImplOpenGL3_Shutdown();   
     ImGui_ImplGlfw_Shutdown();
     ImPlot3D::DestroyContext();

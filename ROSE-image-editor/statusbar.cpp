@@ -5,7 +5,7 @@
 
 #include "imgui_internal.h"
 #include "appstate.h"
-#include "imageviewer.h"
+#include "workspace.h"
 
 namespace
 {
@@ -35,7 +35,7 @@ void StatusBar::ReserveBottomSpace()
     viewport->BuildWorkInsetMax.y += GetHeight();
 }
 
-void StatusBar::Draw()
+void StatusBar::RenderStatusBar()
 {
     ImGuiViewport* viewport = ImGui::GetMainViewport();
     const float height = GetHeight();
@@ -65,13 +65,14 @@ void StatusBar::Draw()
     if (ImGui::Begin("##StatusBar", nullptr, flags))
     {
         const ImGuiIO& io = ImGui::GetIO();
+        const ImGuiStyle& style = ImGui::GetStyle();
 
         // ---------------------------------------------------------------
-        // Left side: zoom level | image resolution
+        // Left area: zoom level | image resolution
         // ---------------------------------------------------------------
         char zoomText[64];
         if (App::HasDocument())
-            snprintf(zoomText, sizeof(zoomText), "Zoom: %.0f%%", ImageViewer::GetZoom() * 100.0f);
+            snprintf(zoomText, sizeof(zoomText), "Zoom: %.0f%%", Workspace::GetZoom() * 100.0f);
         else
             snprintf(zoomText, sizeof(zoomText), "Zoom: --");
 
@@ -83,27 +84,40 @@ void StatusBar::Draw()
         char resText[64];
         if (App::HasDocument())
             snprintf(resText, sizeof(resText), "%d x %d px",
-                     ImageViewer::GetImageWidth(), ImageViewer::GetImageHeight());
+                     Workspace::GetImageWidth(), Workspace::GetImageHeight());
         else
             snprintf(resText, sizeof(resText), "No image loaded");
 
         ImGui::TextUnformatted(resText);
 
         // ---------------------------------------------------------------
-        // Right side: pressed keys | FPS
+        // Right area: pressed keys | FPS, anchored to the far-right edge.
+        //
+        // Compute the exact combined width of every element that will be
+        // rendered (including the ImGui item spacing the SameLine() calls
+        // insert between them), then back the cursor off that distance from
+        // the right edge of the window minus its horizontal padding. This is
+        // resolution-independent true right alignment (no left-side margins).
         // ---------------------------------------------------------------
         const std::string keys = GetPressedKeysString();
 
         char fpsText[64];
         snprintf(fpsText, sizeof(fpsText), "%.1f FPS", io.Framerate);
 
-        const float pad = ImGui::GetStyle().ItemSpacing.x;
-        float rightWidth = ImGui::CalcTextSize(fpsText).x;
-        if (!keys.empty())
-            rightWidth += ImGui::CalcTextSize(keys.c_str()).x + pad + ImGui::CalcTextSize("|").x;
+        const float keysWidth = keys.empty() ? 0.0f : ImGui::CalcTextSize(keys.c_str()).x;
+        const float sepWidth  = ImGui::CalcTextSize("|").x;
+        const float fpsWidth  = ImGui::CalcTextSize(fpsText).x;
+        const float spacing   = style.ItemSpacing.x;
 
+        // keys <spacing> | <spacing> FPS  (the separator only renders when
+        // there is at least one pressed key, so fold its spacing in as well).
+        const float rightElementsWidth =
+            (keys.empty() ? 0.0f : keysWidth + spacing + sepWidth + spacing) + fpsWidth;
+
+        // True right alignment: cursor starts so that the right edge of the
+        // last element lands exactly at the window's content right edge.
         ImGui::SameLine(0.0f, 0.0f);
-        ImGui::SetCursorPosX(ImGui::GetWindowWidth() - rightWidth - pad * 2.0f);
+        ImGui::SetCursorPosX(ImGui::GetWindowWidth() - rightElementsWidth - style.WindowPadding.x);
 
         if (!keys.empty())
         {

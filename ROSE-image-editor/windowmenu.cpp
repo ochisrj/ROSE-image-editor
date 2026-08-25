@@ -1,12 +1,11 @@
-﻿#include "windowmenu.h"
+#include "windowmenu.h"
 
 #include <cstdio>
 
 #include "imgui.h"
 #include "appstate.h"
 #include "appcommands.h"
-#include "imageviewer.h"
-
+#include "workspace.h"
 void WindowMenu::DrawMenu()
 {
     if (ImGui::BeginMenu("Window"))
@@ -84,10 +83,8 @@ void WindowMenu::DrawMenu()
         ImGui::MenuItem("Viewport / Scene View", nullptr, &App::ShowViewport);
 
         ImGui::Separator();
-
         ImGui::MenuItem("Application Frame", nullptr, &App::ApplicationFrame);
         ImGui::MenuItem("Options", nullptr, &App::ShowOptions);
-        ImGui::MenuItem("Tools", nullptr, &App::ShowTools);
 
         ImGui::EndMenu();
     }
@@ -96,31 +93,14 @@ void WindowMenu::DrawMenu()
 void WindowMenu::DrawWindow()
 {
     if (App::ShowViewport)
-        ImageViewer::DrawWindow();
+        Workspace::DrawWindow();
+
 
     if (App::ShowTools)
     {
-        ImGui::SetNextWindowSize(ImVec2(220, 320), ImGuiCond_FirstUseEver);
-        if (ImGui::Begin("Tools", &App::ShowTools))
-        {
-            static const char* const tools[] =
-            {
-                "Move", "Marquee", "Lasso", "Wand",
-                "Crop", "Eyedropper", "Brush", "Eraser",
-                "Text", "Zoom"
-            };
-            const float w = (ImGui::GetContentRegionAvail().x - ImGui::GetStyle().ItemSpacing.x) * 0.5f;
-            for (int i = 0; i < (int)IM_ARRAYSIZE(tools); ++i)
-            {
-                ImGui::PushID(i);
-                if (ImGui::Selectable(tools[i], false, 0, ImVec2(w, 0)))
-                    App::SetStatus("Tool selected: %s", tools[i]);
-                if ((i & 1) == 0 && i + 1 < (int)IM_ARRAYSIZE(tools))
-                    ImGui::SameLine();
-                ImGui::PopID();
-            }
-            ImGui::End();
-        }
+        // Note: The old tools window is now replaced by the new tool panel above.
+        // This block is kept for backward compatibility but does nothing.
+        // Remove this block in a future cleanup if desired.
     }
 
     if (App::ShowLayers)
@@ -168,8 +148,8 @@ void WindowMenu::DrawWindow()
             {
                 ImGui::TextUnformatted("Image");
                 ImGui::Separator();
-                ImGui::Text("Name: %s", ImageViewer::FileName().c_str());
-                ImGui::Text("Zoom: %.1f%%", ImageViewer::GetZoom() * 100.0f);
+                ImGui::Text("Name: %s", Workspace::FileName().c_str());
+                ImGui::Text("Zoom: %.1f%%", Workspace::GetZoom() * 100.0f);
             }
             else
             {

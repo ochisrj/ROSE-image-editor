@@ -158,7 +158,8 @@
     <ClCompile Include="glad.c" />
     <ClCompile Include="helpmenu.cpp" />
     <ClCompile Include="imagemenu.cpp" />
-    <ClCompile Include="imageviewer.cpp" />
+    <ClCompile Include="workspace.cpp" />
+    <ClCompile Include="rulerscale.cpp" />
     <ClCompile Include="imgui\imgui.cpp" />
     <ClCompile Include="imgui\imgui_demo.cpp" />
     <ClCompile Include="imgui\imgui_draw.cpp" />
@@ -193,7 +194,8 @@
     <ClInclude Include="googlesan.h" />
     <ClInclude Include="helpmenu.h" />
     <ClInclude Include="imagemenu.h" />
-    <ClInclude Include="imageviewer.h" />
+    <ClInclude Include="workspace.h" />
+    <ClInclude Include="rulerscale.h" />
     <ClInclude Include="imgui\imconfig.h" />
     <ClInclude Include="imgui\imgui.h" />
     <ClInclude Include="imgui\imgui_impl_glfw.h" />

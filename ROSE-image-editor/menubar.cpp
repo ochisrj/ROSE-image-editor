@@ -1,9 +1,10 @@
-﻿#include "menubar.h"
+#include "menubar.h"
 
 #include "imgui.h"
 #include "appstate.h"
 #include "appcommands.h"
 #include "statusbar.h"
+#include <GLFW/glfw3.h>
 
 void MenuBar::Draw(GLFWwindow* window)
 {
@@ -12,7 +13,7 @@ void MenuBar::Draw(GLFWwindow* window)
     RenderMenuWindows();
     App::HandleGlobalShortcuts();
     App::Dispatch();
-    StatusBar::Draw();
+    StatusBar::RenderStatusBar();
 }
 
 void MenuBar::RenderMainMenuBar(GLFWwindow* window)
@@ -43,6 +44,9 @@ void MenuBar::RenderMainMenuBar(GLFWwindow* window)
         //    ImGui::TextDisabled("| %.1f FPS", ImGui::GetIO().Framerate);
         //}
 
+        // Tool shortcuts (V, M, L, I, H, Z) - only when no text input is focused
+        
+
         ImGui::EndMainMenuBar();
     }
 }
@@ -58,4 +62,6 @@ void MenuBar::RenderMenuWindows()
     ViewMenu::DrawWindow();
     WindowMenu::DrawWindow();
     HelpMenu::DrawWindow();
+
+
 }
