@@ -129,9 +129,6 @@
     <ClCompile Include="workspace.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="rulerscale.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="statusbar.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -219,9 +216,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="workspace.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="rulerscale.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="googlesan.h">

@@ -39,8 +39,6 @@ static void FramebufferSizeCallback(GLFWwindow* /*window*/, int width, int heigh
 
 int main()
 {
-    cv::utils::logging::setLogLevel(cv::utils::logging::LOG_LEVEL_ERROR);
-
     glfwInit();
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
@@ -97,23 +95,12 @@ int main()
     font_cfg.FontDataOwnedByAtlas = false;
     io.Fonts->AddFontFromMemoryTTF(cascadia, cascadiasize, 16.0f, &font_cfg, io.Fonts->GetGlyphRangesThai());
     
-    //ImFont* thaiFont = io.Fonts->AddFontFromFileTTF(
-    //    cascadia,
-    //    16.0f,
-    //    nullptr,
-    //    io.Fonts->GetGlyphRangesThai()
-    //);
-
-    //io.Fonts->Build();
-    
-
-
     // Main while loop
     while (!glfwWindowShouldClose(window))
     {
         glClearColor(0.45f, 0.55f, 0.60f, 1.00f);
         glClear(GL_COLOR_BUFFER_BIT);
-
+        
         // Draw the background triangle directly into the window framebuffer.
         // glViewport is kept up to date by FramebufferSizeCallback on resize,
         // so the triangle always fills the window and stays centered.

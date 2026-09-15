@@ -75,12 +75,12 @@
     <LibraryPath>C:\Users\Ochi\Downloads\ROSE-image-editor\ROSE-image-editor\Libraries\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>C:\Users\ochig\Project\Imgui\ROSE-image-editor\ROSE-image-editor\Libraries\include;C:\Users\ochig\Project\Imgui\ROSE-image-editor\ROSE-image-editor\Libraries\opencv\build\include;$(IncludePath)</IncludePath>
-    <LibraryPath>C:\Users\ochig\Project\Imgui\ROSE-image-editor\ROSE-image-editor\Libraries\lib;C:\Users\ochig\Project\Imgui\ROSE-image-editor\ROSE-image-editor\Libraries\opencv\build\x64\vc16\lib;$(LibraryPath)</LibraryPath>
+    <IncludePath>C:\Users\ochig\Project\Imgui\ROSE-image-editor\ROSE-image-editor\Libraries\include;$(IncludePath)</IncludePath>
+    <LibraryPath>C:\Users\ochig\Project\Imgui\ROSE-image-editor\ROSE-image-editor\Libraries\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <IncludePath>C:\Users\ochig\Project\Imgui\ROSE-image-editor\ROSE-image-editor\Libraries\include;C:\Users\ochig\Project\Imgui\ROSE-image-editor\ROSE-image-editor\Libraries\opencv\build\include;$(IncludePath)</IncludePath>
-    <LibraryPath>C:\Users\ochig\Project\Imgui\ROSE-image-editor\ROSE-image-editor\Libraries\lib;C:\Users\ochig\Project\Imgui\ROSE-image-editor\ROSE-image-editor\Libraries\opencv\build\x64\vc16\lib;$(LibraryPath)</LibraryPath>
+    <IncludePath>C:\Users\ochig\Project\Imgui\ROSE-image-editor\ROSE-image-editor\Libraries\include;$(IncludePath)</IncludePath>
+    <LibraryPath>C:\Users\ochig\Project\Imgui\ROSE-image-editor\ROSE-image-editor\Libraries\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -123,11 +123,8 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>glfw3.lib;opencv_world4130d.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>glfw3.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
-    <PostBuildEvent>
-      <Command>xcopy /Y /D "$(ProjectDir)Libraries\opencv\build\x64\vc16\bin\opencv_world4130d.dll" "$(OutDir)" &amp;&amp; xcopy /Y /D "$(ProjectDir)Libraries\opencv\build\x64\vc16\bin\opencv_videoio_ffmpeg4130_64.dll" "$(OutDir)"</Command>
-    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
@@ -143,11 +140,8 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>glfw3.lib;opencv_world4130.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>glfw3.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
-    <PostBuildEvent>
-      <Command>xcopy /Y /D "$(ProjectDir)Libraries\opencv\build\x64\vc16\bin\opencv_world4130.dll" "$(OutDir)" &amp;&amp; xcopy /Y /D "$(ProjectDir)Libraries\opencv\build\x64\vc16\bin\opencv_videoio_ffmpeg4130_64.dll" "$(OutDir)"</Command>
-    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="appstate.cpp" />
@@ -159,7 +153,6 @@
     <ClCompile Include="helpmenu.cpp" />
     <ClCompile Include="imagemenu.cpp" />
     <ClCompile Include="workspace.cpp" />
-    <ClCompile Include="rulerscale.cpp" />
     <ClCompile Include="imgui\imgui.cpp" />
     <ClCompile Include="imgui\imgui_demo.cpp" />
     <ClCompile Include="imgui\imgui_draw.cpp" />
@@ -195,7 +188,6 @@
     <ClInclude Include="helpmenu.h" />
     <ClInclude Include="imagemenu.h" />
     <ClInclude Include="workspace.h" />
-    <ClInclude Include="rulerscale.h" />
     <ClInclude Include="imgui\imconfig.h" />
     <ClInclude Include="imgui\imgui.h" />
     <ClInclude Include="imgui\imgui_impl_glfw.h" />
