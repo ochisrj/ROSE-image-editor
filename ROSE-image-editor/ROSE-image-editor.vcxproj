@@ -184,7 +184,6 @@
     <ClInclude Include="editmenu.h" />
     <ClInclude Include="filemenu.h" />
     <ClInclude Include="filtermenu.h" />
-    <ClInclude Include="googlesan.h" />
     <ClInclude Include="helpmenu.h" />
     <ClInclude Include="imagemenu.h" />
     <ClInclude Include="workspace.h" />
@@ -211,9 +210,6 @@
   <ItemGroup>
     <Image Include="..\..\..\..\OneDrive\Pictures\Picture\56946.jpg" />
     <Image Include="personalimag.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <Font Include="GoogleSans.ttf" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -56,6 +56,12 @@ public:
     static int   GetImageWidth();
     static int   GetImageHeight();
 
+    // Photoshop-style pixel grid: visible only when zoom >= threshold and user toggle is on.
+    static constexpr float kPixelGridThreshold = 4.0f;   // 400% - matches Photoshop default
+    static constexpr float kNearestThreshold   = 1.0f;   // >100% -> GL_NEAREST for crisp pixels
+    static bool  IsPixelGridActive(float zoom);          // threshold + toggle + hasImage
+    static bool  IsPixelGridActive();                    // uses active image zoom
+
     // Opens the "Add Guide" modal (View > Guides > Add Guide... / command).
     static void OpenAddGuideDialog();
 
@@ -92,6 +98,7 @@ private:
         float  zoom = 1.0f;
         float  panX = 0.0f;
         float  panY = 0.0f;
+        bool   useNearestFilter = false; // cached GL filter state to avoid redundant glTexParameteri
         std::vector<Guide> guides;
     };
 
@@ -117,12 +124,16 @@ private:
     static void DrawCanvas();
     static void DrawGrid(ImDrawList* dl, const ImVec2& imageOrigin, float zoom,
                          const ImVec2& canvasMin, const ImVec2& canvasMax);
+    static void DrawPixelGrid(ImDrawList* dl, const ImVec2& imageOrigin, float zoom,
+                              const ImVec2& canvasMin, const ImVec2& canvasMax,
+                              int imageW, int imageH);
     static void DrawRulers(ImDrawList* dl, const ImVec2& imageOrigin, float zoom,
                            const ImVec2& canvasMin, const ImVec2& canvasMax, float rulerSize);
     static void DrawGuides(ImDrawList* dl, const std::vector<Guide>& guides,
                            const ImVec2& imageOrigin, float zoom,
                            const ImVec2& canvasMin, const ImVec2& canvasMax, int highlightIndex);
     static void DrawGuideDialog();
+    static void UpdateTextureFiltering(Image* img);
 
     static void CloseImage(int index);
 

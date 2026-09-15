@@ -30,23 +30,6 @@ void MenuBar::RenderMainMenuBar(GLFWwindow* window)
         WindowMenu::DrawMenu();
         HelpMenu::DrawMenu();
 
-        // Right-aligned status / FPS readout.
-        if (!App::Status.empty())
-        {
-            ImGui::SameLine(0.0f, 0.0f);
-            ImGui::SetCursorPosX(ImGui::GetWindowWidth() - 260.0f);
-            ImGui::TextUnformatted(App::Status.c_str());
-        }
-        //if (App::PrefShowFps)
-        //{
-        //    ImGui::SameLine(0.0f, 0.0f);
-        //    ImGui::SetCursorPosX(ImGui::GetWindowWidth() - 70.0f);
-        //    ImGui::TextDisabled("| %.1f FPS", ImGui::GetIO().Framerate);
-        //}
-
-        // Tool shortcuts (V, M, L, I, H, Z) - only when no text input is focused
-        
-
         ImGui::EndMainMenuBar();
     }
 }
@@ -62,6 +45,5 @@ void MenuBar::RenderMenuWindows()
     ViewMenu::DrawWindow();
     WindowMenu::DrawWindow();
     HelpMenu::DrawWindow();
-
 
 }

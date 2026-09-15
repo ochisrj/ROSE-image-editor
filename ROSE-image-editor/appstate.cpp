@@ -38,7 +38,7 @@ namespace App
     bool ShowGuides      = true;
     bool ShowTargetPath  = false;
     bool ShowCanvasGuides = false;
-    bool ShowPixelGrid   = false;
+    bool ShowPixelGrid   = true;   // on by default; actual rendering gated by zoom >= 400%
     bool ShowLayerEdges  = false;
     bool ShowSelectionEdges = false;
 
@@ -333,6 +333,7 @@ namespace App
         case Cmd::ViewShowGrid:     ShowGrid = !ShowGrid; break;
         case Cmd::ViewShowRulers:   ShowRulers = !ShowRulers; break;
         case Cmd::ViewShowGuides:   ShowGuides = !ShowGuides; break;
+        case Cmd::ViewShowPixelGrid: ShowPixelGrid = !ShowPixelGrid; break;
         case Cmd::ViewSnap:         SnapEnabled = !SnapEnabled; break;
         case Cmd::ViewGuideNew:     Workspace::OpenAddGuideDialog(); break;
         case Cmd::ViewGuideClearGuides:

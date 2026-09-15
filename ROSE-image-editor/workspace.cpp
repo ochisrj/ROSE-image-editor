@@ -26,6 +26,8 @@
 #include <utility>
 #include <vector>
 
+#pragma warning(disable:6262) // large stack frame - DrawCanvas is intentionally inline for performance; preview path now avoids vector copy
+
 namespace fs = std::filesystem;
 
 bool           Workspace::s_Visible = false;
@@ -225,6 +227,7 @@ void Workspace::PollLoadResult()
     glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, result.width, result.height, 0, GL_RGBA, GL_UNSIGNED_BYTE, result.pixels.data());
     glBindTexture(GL_TEXTURE_2D, 0);
+    img.useNearestFilter = false; // starts at GL_LINEAR; will switch to NEAREST when zoom > 1.0
 
     fs::path p(result.path);
     img.fileName = p.filename().string();
@@ -343,6 +346,31 @@ float Workspace::GetZoom()
 {
     Image* img = ActiveImage();
     return img ? img->zoom : 1.0f;
+}
+
+bool Workspace::IsPixelGridActive(float zoom)
+{
+    return App::ShowPixelGrid && zoom >= kPixelGridThreshold && HasImage();
+}
+
+bool Workspace::IsPixelGridActive()
+{
+    return IsPixelGridActive(GetZoom());
+}
+
+void Workspace::UpdateTextureFiltering(Image* img)
+{
+    if (!img || img->texture == 0)
+        return;
+    const bool wantNearest = img->zoom > kNearestThreshold;
+    if (wantNearest == img->useNearestFilter)
+        return; // no state change -> avoid redundant GL call
+    glBindTexture(GL_TEXTURE_2D, img->texture);
+    const GLint filter = wantNearest ? GL_NEAREST : GL_LINEAR;
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, filter);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, filter);
+    glBindTexture(GL_TEXTURE_2D, 0);
+    img->useNearestFilter = wantNearest;
 }
 
 int Workspace::GetImageWidth()
@@ -535,6 +563,58 @@ void Workspace::DrawGrid(ImDrawList* dl, const ImVec2& imageOrigin, float zoom,
     }
 }
 
+// Photoshop-style per-pixel grid: one line per image pixel, visible only at high zoom.
+// Uses a subtle semi-transparent white/grey (30% opacity) and is clipped to the canvas.
+// Lines are placed at imageOrigin + k * zoom so they track pan/zoom without drift.
+void Workspace::DrawPixelGrid(ImDrawList* dl, const ImVec2& imageOrigin, float zoom,
+                              const ImVec2& canvasMin, const ImVec2& canvasMax,
+                              int imageW, int imageH)
+{
+    if (imageW <= 0 || imageH <= 0)
+        return;
+    if (!App::ShowPixelGrid)
+        return;
+    if (zoom < kPixelGridThreshold)
+        return;
+
+    // Push clip rect so lines never bleed outside the image viewport.
+    dl->PushClipRect(canvasMin, canvasMax, true);
+
+    // ~30% opacity light grey/white - visible on mid/dark images without distracting.
+    // Photoshop uses #808080 @ ~30%; we use white @ 30% which composites similarly.
+    const ImU32 col = ImGui::ColorConvertFloat4ToU32(ImVec4(0.95f, 0.95f, 0.98f, 0.30f));
+
+    const float invZoom = 1.0f / zoom;
+
+    // Visible pixel index range clipped to [0, dim] to avoid drawing thousands of
+    // off-screen lines on large images.
+    int x0 = (int)floorf((canvasMin.x - imageOrigin.x) * invZoom);
+    int x1 = (int)ceilf ((canvasMax.x - imageOrigin.x) * invZoom);
+    int y0 = (int)floorf((canvasMin.y - imageOrigin.y) * invZoom);
+    int y1 = (int)ceilf ((canvasMax.y - imageOrigin.y) * invZoom);
+    x0 = std::clamp(x0, 0, imageW);
+    x1 = std::clamp(x1, 0,  imageW);
+    y0 = std::clamp(y0, 0, imageH);
+    y1 = std::clamp(y1, 0, imageH);
+
+    // Vertical lines: x = origin.x + k * zoom
+    for (int k = x0; k <= x1; ++k)
+    {
+        const float sx = imageOrigin.x + (float)k * zoom;
+        // ImGui lines are centered; for 1px crispness keep integer coords.
+        // imageOrigin is already roundf()'d so sx lands on pixel boundaries.
+        dl->AddLine(ImVec2(sx, canvasMin.y), ImVec2(sx, canvasMax.y), col, 1.0f);
+    }
+    // Horizontal lines: y = origin.y + k * zoom
+    for (int k = y0; k <= y1; ++k)
+    {
+        const float sy = imageOrigin.y + (float)k * zoom;
+        dl->AddLine(ImVec2(canvasMin.x, sy), ImVec2(canvasMax.x, sy), col, 1.0f);
+    }
+
+    dl->PopClipRect();
+}
+
 static void TickLabel(int value, char* buf, size_t len)
 {
     snprintf(buf, len, "%d", value);
@@ -702,6 +782,7 @@ void Workspace::DrawCanvas()
     const bool shift   = io.KeyShift;
     const bool midDown = ImGui::IsMouseDown(ImGuiMouseButton_Middle);
     const bool lmbDown = ImGui::IsMouseDown(ImGuiMouseButton_Left);
+    const bool rmbDown = ImGui::IsMouseDown(ImGuiMouseButton_Right);
     const bool guidesInteractive = App::ShowGuides && !img->guides.empty();
 
     // ---- 0) Drag-from-ruler guide creation (Photoshop style) ----
@@ -773,8 +854,8 @@ void Workspace::DrawCanvas()
     if (!lmbDown)
         s_GuideDrag = -1;
 
-    // ---- 2) Middle mouse: axis-locked panning ----
-    // Ctrl + MMB: X-axis only. Shift + MMB: Y-axis only. Plain MMB: free.
+    // ---- 2) Middle / Right mouse: axis-locked panning (RMB drag per spec, MMB retained) ----
+    // Ctrl + drag: X-axis only. Shift + drag: Y-axis only. Plain: free.
     if (hovered && ImGui::IsMouseClicked(ImGuiMouseButton_Middle))
     {
         s_Dragging = true;
@@ -785,7 +866,20 @@ void Workspace::DrawCanvas()
             s_PanLockX = true;
         s_GuideDrag = -1;
     }
-    if (!midDown && !lmbDown)
+    // RMB drag panning (Photoshop-style Hand tool). Suppressed while a guide is being dragged.
+    if (hovered && ImGui::IsMouseClicked(ImGuiMouseButton_Right) && s_GuideDrag < 0 && s_RulerDrag < 0)
+    {
+        // Only start RMB pan if the context menu is not already open; a pure click
+        // will still open the menu on release, a drag will pan instead.
+        s_Dragging = true;
+        s_PanLockX = s_PanLockY = false;
+        if (ctrl)
+            s_PanLockY = true;
+        if (shift)
+            s_PanLockX = true;
+        s_GuideDrag = -1;
+    }
+    if (!midDown && !lmbDown && !rmbDown)
         s_Dragging = false;
 
     // ---- 3) Apply the active interaction ----
@@ -888,6 +982,9 @@ void Workspace::DrawCanvas()
     imageOrigin.y = roundf(imageOrigin.y);
     const ImVec2 p1(imageOrigin.x + roundf(dispW), imageOrigin.y + roundf(dispH));
 
+    // ---- 5b) Dynamic filtering: GL_NEAREST beyond 100% for crisp pixel boundaries ----
+    UpdateTextureFiltering(img);
+
     ImDrawList* dl = ImGui::GetWindowDrawList();
 
     // Background alignment grid (behind the image).
@@ -897,6 +994,12 @@ void Workspace::DrawCanvas()
     // The active image's texture is looked up fresh every frame from the
     // selected tab, so switching tabs immediately changes the bound texture.
     dl->AddImage((ImTextureID)(intptr_t)img->texture, imageOrigin, p1);
+
+    // ---- 5c) Photoshop-style pixel grid overlay (on top of image, under guides) ----
+    // Automatically visible only when zoom >= 400% and ShowPixelGrid toggle is on.
+    // Lines are drawn at every image pixel boundary and clipped to the viewport.
+    if (IsPixelGridActive(img->zoom))
+        DrawPixelGrid(dl, imageOrigin, img->zoom, workMin, canvasMax, img->width, img->height);
 
     // Glowing cyan guides on top of the image.
     if (App::ShowGuides)
@@ -911,7 +1014,7 @@ void Workspace::DrawCanvas()
         }
         DrawGuides(dl, img->guides, imageOrigin, img->zoom, workMin, canvasMax, highlight);
 
-        // Live preview while pulling a guide out of a ruler.
+        // Live preview while pulling a guide out of a ruler (drawn without copying the whole guides vector to keep stack small).
         if (s_RulerDrag >= 0)
         {
             Guide preview;
@@ -921,10 +1024,21 @@ void Workspace::DrawCanvas()
                 preview.horizontal ? (io.MousePos.y - imageOrigin.y) / img->zoom
                                    : (io.MousePos.x - imageOrigin.x) / img->zoom,
                 maxPos);
-            std::vector<Guide> previews = img->guides;
-            previews.push_back(preview);
-            DrawGuides(dl, previews, imageOrigin, img->zoom, workMin, canvasMax,
-                       (int)previews.size() - 1);
+            // Draw existing guides first, then preview as a highlighted single guide - avoids std::vector copy on stack.
+            const ImU32 glowCol = ImGui::ColorConvertFloat4ToU32(ImVec4(0.0f, 0.9f, 1.0f, 0.30f));
+            const ImU32 hiCol   = ImGui::ColorConvertFloat4ToU32(ImVec4(1.0f, 1.0f, 1.0f, 1.0f));
+            if (preview.horizontal)
+            {
+                const float y = imageOrigin.y + preview.position * img->zoom;
+                dl->AddLine(ImVec2(workMin.x, y), ImVec2(canvasMax.x, y), glowCol, 7.0f);
+                dl->AddLine(ImVec2(workMin.x, y), ImVec2(canvasMax.x, y), hiCol, 1.0f);
+            }
+            else
+            {
+                const float x = imageOrigin.x + preview.position * img->zoom;
+                dl->AddLine(ImVec2(x, workMin.y), ImVec2(x, canvasMax.y), glowCol, 7.0f);
+                dl->AddLine(ImVec2(x, workMin.y), ImVec2(x, canvasMax.y), hiCol, 1.0f);
+            }
         }
     }
 
@@ -932,11 +1046,78 @@ void Workspace::DrawCanvas()
     if (App::ShowRulers)
         DrawRulers(dl, imageOrigin, img->zoom, canvasMin, canvasMax, rulerSize);
 
+    // ---- In-canvas zoom / pixel-grid status overlay (bottom-left, semi-transparent) ----
+    {
+        const bool gridOn = IsPixelGridActive(img->zoom);
+        char overlay[64];
+        if (gridOn)
+            snprintf(overlay, sizeof(overlay), "Zoom: %.0f%% (Pixel Grid Active)", img->zoom * 100.0f);
+        else if (App::ShowPixelGrid && img->zoom >= kPixelGridThreshold * 0.85f)
+            snprintf(overlay, sizeof(overlay), "Zoom: %.0f%% (Pixel Grid: %s)", img->zoom * 100.0f, "threshold 400%");
+        else
+            snprintf(overlay, sizeof(overlay), "Zoom: %.0f%%", img->zoom * 100.0f);
+
+        const ImVec2 txtSize = ImGui::CalcTextSize(overlay);
+        const ImVec2 pad(6.0f, 3.0f);
+        const ImVec2 bgMin(workMin.x + 6.0f, canvasMax.y - txtSize.y - pad.y * 2.0f - 6.0f);
+        const ImVec2 bgMax(bgMin.x + txtSize.x + pad.x * 2.0f, bgMin.y + txtSize.y + pad.y * 2.0f);
+        const ImU32 bgCol = ImGui::ColorConvertFloat4ToU32(ImVec4(0.12f, 0.12f, 0.13f, 0.78f));
+        const ImU32 txCol = gridOn ? ImGui::ColorConvertFloat4ToU32(ImVec4(0.45f, 0.95f, 1.0f, 1.0f))
+                                   : ImGui::ColorConvertFloat4ToU32(ImVec4(0.90f, 0.90f, 0.92f, 1.0f));
+        dl->AddRectFilled(bgMin, bgMax, bgCol, 4.0f);
+        dl->AddText(ImVec2(bgMin.x + pad.x, bgMin.y + pad.y), txCol, overlay);
+    }
+
+    // RMB context menu: open on release without significant drag (so RMB pan doesn't trigger it).
+    static ImVec2 s_RmbPressPos = ImVec2(0,0);
     if (hovered && ImGui::IsMouseClicked(ImGuiMouseButton_Right))
-        ImGui::OpenPopup("##workspace_context");
+        s_RmbPressPos = io.MousePos;
+    if (hovered && ImGui::IsMouseReleased(ImGuiMouseButton_Right))
+    {
+        const float dx = io.MousePos.x - s_RmbPressPos.x;
+        const float dy = io.MousePos.y - s_RmbPressPos.y;
+        const bool isClick = (dx*dx + dy*dy) < 36.0f; // < 6px
+        if (isClick)
+            ImGui::OpenPopup("##workspace_context");
+    }
 
     if (ImGui::BeginPopup("##workspace_context"))
     {
+        // Zoom header (mirrors the status bar / former local menubar hint)
+        {
+            const bool gridOn = IsPixelGridActive(img->zoom);
+            char hdr[64];
+            if (gridOn)
+                snprintf(hdr, sizeof(hdr), "Zoom: %.0f%%  (Pixel Grid Active)", img->zoom * 100.0f);
+            else
+                snprintf(hdr, sizeof(hdr), "Zoom: %.0f%%", img->zoom * 100.0f);
+            ImGui::TextDisabled("%s", hdr);
+            ImGui::Separator();
+        }
+
+        if (ImGui::MenuItem("Show Pixel Grid", nullptr, &App::ShowPixelGrid))
+        {
+            // bool* toggle already applied; no extra Push needed
+        }
+        if (ImGui::IsItemHovered())
+        {
+            if (!HasImage())
+                ImGui::SetTooltip("No image loaded");
+            else if (GetZoom() < kPixelGridThreshold)
+                ImGui::SetTooltip("Pixel grid auto-visible at >= 400%% (current %.0f%%)", GetZoom() * 100.0f);
+            else if (IsPixelGridActive())
+                ImGui::SetTooltip("Pixel grid is active (>= 400%% and enabled)");
+        }
+
+        ImGui::Separator();
+        ImGui::BeginDisabled(!HasImage());
+        if (ImGui::MenuItem("Zoom In", "Ctrl++"))  App::Push(Cmd::ViewZoomIn);
+        if (ImGui::MenuItem("Zoom Out", "Ctrl+-")) App::Push(Cmd::ViewZoomOut);
+        if (ImGui::MenuItem("Fit on Screen", "Ctrl+0")) App::Push(Cmd::ViewFitScreen);
+        if (ImGui::MenuItem("Actual Pixels (100%)", "Ctrl+1")) App::Push(Cmd::ViewActualPixels);
+        ImGui::EndDisabled();
+
+        ImGui::Separator();
         if (ImGui::MenuItem("Add Guide..."))
             OpenAddGuideDialog();
         ImGui::Separator();
@@ -948,10 +1129,6 @@ void Workspace::DrawCanvas()
         ImGui::EndPopup();
     }
 }
-// ในไฟล์ header เพิ่ม static member:
-static bool s_ForceTabSelect;
-
-// workspace.cpp
 
 void Workspace::DrawTabBar()
 {
@@ -1044,8 +1221,6 @@ void Workspace::DrawWindow()
     if (!s_Visible)
         return;
 
-    // No menu bar, no custom styling overrides: the Workspace uses the default
-    // ImGui look and is driven entirely from the main menu bar.
     ImGui::SetNextWindowSize(ImVec2(900, 600), ImGuiCond_FirstUseEver);
     if (!ImGui::Begin("Workspace", &s_Visible))
     {

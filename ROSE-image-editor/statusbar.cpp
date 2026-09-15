@@ -68,15 +68,24 @@ void StatusBar::RenderStatusBar()
         const ImGuiStyle& style = ImGui::GetStyle();
 
         // ---------------------------------------------------------------
-        // Left area: zoom level | image resolution
+        // Left area: zoom level | image resolution (+ pixel grid indicator per spec)
         // ---------------------------------------------------------------
-        char zoomText[64];
+        char zoomText[96];
         if (App::HasDocument())
-            snprintf(zoomText, sizeof(zoomText), "Zoom: %.0f%%", Workspace::GetZoom() * 100.0f);
+        {
+            if (Workspace::IsPixelGridActive())
+                snprintf(zoomText, sizeof(zoomText), "Zoom: %.0f%% (Pixel Grid Active)", Workspace::GetZoom() * 100.0f);
+            else
+                snprintf(zoomText, sizeof(zoomText), "Zoom: %.0f%%", Workspace::GetZoom() * 100.0f);
+        }
         else
             snprintf(zoomText, sizeof(zoomText), "Zoom: --");
 
-        ImGui::TextUnformatted(zoomText);
+        // Highlight the active state in cyan so it reads as an indicator, not just text.
+        if (Workspace::IsPixelGridActive())
+            ImGui::TextColored(ImVec4(0.45f, 0.95f, 1.0f, 1.0f), "%s", zoomText);
+        else
+            ImGui::TextUnformatted(zoomText);
         ImGui::SameLine();
         ImGui::TextDisabled("|");
         ImGui::SameLine();

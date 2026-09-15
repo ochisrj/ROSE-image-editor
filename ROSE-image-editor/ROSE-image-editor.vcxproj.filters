@@ -218,9 +218,6 @@
     <ClInclude Include="workspace.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="googlesan.h">
-      <Filter>Header Files\font</Filter>
-    </ClInclude>
     <ClInclude Include="statusbar.h">
       <Filter>Resource Files</Filter>
     </ClInclude>
@@ -232,8 +229,5 @@
     <Image Include="personalimag.png">
       <Filter>Resource Files\image</Filter>
     </Image>
-  </ItemGroup>
-  <ItemGroup>
-    <Font Include="GoogleSans.ttf" />
   </ItemGroup>
 </Project>
