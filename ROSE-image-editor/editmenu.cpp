@@ -178,53 +178,10 @@ void EditMenu::DrawMenu()
 
 void EditMenu::DrawWindow()
 {
-    if (App::ShowPreferences)
-    {
-        ImGui::OpenPopup("Preferences");
-        App::ShowPreferences = false;
-    }
-
-    bool open = true;
-    if (ImGui::BeginPopupModal("Preferences", &open, ImGuiWindowFlags_AlwaysAutoResize))
-    {
-        if (ImGui::BeginTabBar("##prefs_tabs"))
-        {
-            if (ImGui::BeginTabItem("General"))
-            {
-                ImGui::Checkbox("Show FPS in menu bar", &App::PrefShowFps);
-                ImGui::Checkbox("VSync", &App::PrefVSync);
-                ImGui::Checkbox("Dark theme", &App::PrefThemeDark);
-                ImGui::EndTabItem();
-            }
-            if (ImGui::BeginTabItem("Performance"))
-            {
-                ImGui::Checkbox("Show FPS in menu bar", &App::PrefShowFps);
-                ImGui::TextDisabled("FPS / frame-time overlay");
-                ImGui::EndTabItem();
-            }
-            if (ImGui::BeginTabItem("Scratch Disks"))
-            {
-                ImGui::TextDisabled("Scratch disk configuration (template stub)");
-                ImGui::EndTabItem();
-            }
-            if (ImGui::BeginTabItem("Display / Interface"))
-            {
-                ImGui::Checkbox("Show grid", &App::ShowGrid);
-                ImGui::Checkbox("Show rulers", &App::ShowRulers);
-                ImGui::Checkbox("Show guides", &App::ShowGuides);
-                ImGui::EndTabItem();
-            }
-            if (ImGui::BeginTabItem("Units & Rulers"))
-            {
-                ImGui::TextDisabled("Units / ruler configuration (template stub)");
-                ImGui::EndTabItem();
-            }
-            ImGui::EndTabBar();
-        }
-
-        ImGui::Separator();
-        if (ImGui::Button("Close", ImVec2(120, 0)))
-            open = false;
-        ImGui::EndPopup();
-    }
+    // CLEANUP: Old inline Preferences popup (TabBar) has been fully extracted to
+    // PreferencesWindow.h/.cpp. This stub now delegates to the dedicated class to
+    // avoid duplicate modal logic / ID conflicts ("Preferences" popup owned solely
+    // by PreferencesWindow::Render()).
+    // Kept for backward compatibility - MenuBar::RenderMenuWindows() also calls
+    // PreferencesWindow::Render() directly; double-call is safe (idempotent).
 }

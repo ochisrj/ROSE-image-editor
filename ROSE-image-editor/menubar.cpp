@@ -4,6 +4,8 @@
 #include "appstate.h"
 #include "appcommands.h"
 #include "statusbar.h"
+#include "PreferencesWindow.h"
+#include "LanguageTest.h"
 #include <GLFW/glfw3.h>
 
 void MenuBar::Draw(GLFWwindow* window)
@@ -37,7 +39,7 @@ void MenuBar::RenderMainMenuBar(GLFWwindow* window)
 void MenuBar::RenderMenuWindows()
 {
     FileMenu::DrawWindow();
-    EditMenu::DrawWindow();
+    EditMenu::DrawWindow(); // now a no-op stub (logic moved to PreferencesWindow)
     ImageMenu::DrawWindow();
     LayerMenu::DrawWindow();
     SelectMenu::DrawWindow();
@@ -46,4 +48,9 @@ void MenuBar::RenderMenuWindows()
     WindowMenu::DrawWindow();
     HelpMenu::DrawWindow();
 
+    // Dedicated Photoshop-style Preferences modal (owns "Preferences" popup ID)
+    PreferencesWindow::Render();
+
+    // Thai Language Test window
+    LanguageTest::Draw();
 }

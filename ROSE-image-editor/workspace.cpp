@@ -1222,7 +1222,7 @@ void Workspace::DrawWindow()
         return;
 
     ImGui::SetNextWindowSize(ImVec2(900, 600), ImGuiCond_FirstUseEver);
-    if (!ImGui::Begin("Workspace", &s_Visible))
+    if (!ImGui::Begin("Workspace", &s_Visible)) 
     {
         ImGui::End();
         return;

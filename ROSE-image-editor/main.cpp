@@ -9,6 +9,8 @@
 #include "menubar.h"
 #include "camera.h"
 #include "workspace.h"
+#include "PreferencesWindow.h"
+#include "LanguageTest.h"
 
 
 
@@ -90,9 +92,56 @@ int main()
     ImGui_ImplGlfw_InitForOpenGL(window, true);
     ImGui_ImplOpenGL3_Init("#version 330");
 
-    ImFontConfig font_cfg;
-    font_cfg.FontDataOwnedByAtlas = false;
-    io.Fonts->AddFontFromMemoryTTF(cascadia, cascadiasize, 16.0f, &font_cfg, io.Fonts->GetGlyphRangesThai());
+    // ---- Thai-capable font setup (global) ----
+    // CascadiaCode has NO Thai glyphs. Old code AddFontFromMemoryTTF(cascadia, GetGlyphRangesThai())
+    // requested Thai but rendered tofu. Fix: load Cascadia for Latin, then MergeMode
+    // RD CHULAJARUEK.ttf for U+0E00..U+0E7F so EVERY ImGui window (menus, panels, inputs) can show Thai.
+    ImFont* mainFont = nullptr;
+    ImFont* thaiFont = nullptr;
+    {
+        ImFontConfig cfg;
+        cfg.FontDataOwnedByAtlas = false;
+        mainFont = io.Fonts->AddFontFromMemoryTTF(cascadia, cascadiasize, 16.0f, &cfg, io.Fonts->GetGlyphRangesDefault());
+        if (mainFont)
+        {
+            ImFontConfig thaiCfg;
+            thaiCfg.MergeMode = true;
+            thaiCfg.PixelSnapH = true;
+            // RD CHULAJARUEK.ttf is the Thai font (77848 bytes). Also try ZF/GoogleSans fallback.
+            const char* candidates[] = {
+                "RD CHULAJARUEK.ttf",
+                "./RD CHULAJARUEK.ttf",
+                "ROSE-image-editor/RD CHULAJARUEK.ttf",
+                "C:\\Users\\ochig\\Project\\Imgui\\ROSE-image-editor\\ROSE-image-editor\\RD CHULAJARUEK.ttf",
+                "GoogleSans.ttf",
+                "./GoogleSans.ttf",
+                "ZF#2ndPixelus.ttf",
+            };
+            for (const char* p : candidates)
+            {
+                thaiFont = io.Fonts->AddFontFromFileTTF(p, 16.0f, &thaiCfg, io.Fonts->GetGlyphRangesThai());
+                if (thaiFont) break;
+            }
+            // Fallback: standalone Thai font (for LanguageTest grid even if merge failed)
+            if (!thaiFont)
+            {
+                ImFontConfig standaloneCfg;
+                for (const char* p : candidates)
+                {
+                    thaiFont = io.Fonts->AddFontFromFileTTF(p, 16.0f, &standaloneCfg, io.Fonts->GetGlyphRangesThai());
+                    if (thaiFont) break;
+                }
+            }
+            // Make merged font the default for the whole app
+            io.FontDefault = mainFont;
+        }
+    }
+    LanguageTest::SetFonts(mainFont, thaiFont ? thaiFont : mainFont);
+    // Global scale (affects every window, not just LanguageTest). Keep 1.0 = 16px.
+    // LanguageTest slider will modify io.FontGlobalScale / Style.FontScaleMain live.
+
+    // Init dedicated Preferences window (Photoshop-style scaffold)
+    PreferencesWindow::Init();
     
     // Main while loop
     while (!glfwWindowShouldClose(window))

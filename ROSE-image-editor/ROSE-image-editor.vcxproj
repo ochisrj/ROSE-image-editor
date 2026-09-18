@@ -119,12 +119,17 @@
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>C:\Users\ochig\Project\Imgui\ROSE-image-editor\ROSE-image-editor\Libraries\include\stb;imgui;implot;implot-3d;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp20</LanguageStandard>
+      <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalDependencies>glfw3.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
+    <PostBuildEvent>
+      <Command>xcopy /Y /D "$(ProjectDir)RD CHULAJARUEK.ttf" "$(OutDir)"
+xcopy /Y /D "$(ProjectDir)ZF#2ndPixelus.ttf" "$(OutDir)"</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
@@ -136,17 +141,24 @@
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>C:\Users\ochig\Project\Imgui\ROSE-image-editor\ROSE-image-editor\Libraries\include\stb;imgui;implot;implot-3d;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp20</LanguageStandard>
+      <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalDependencies>glfw3.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
+    <PostBuildEvent>
+      <Command>xcopy /Y /D "$(ProjectDir)RD CHULAJARUEK.ttf" "$(OutDir)"
+xcopy /Y /D "$(ProjectDir)ZF#2ndPixelus.ttf" "$(OutDir)"</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="appstate.cpp" />
     <ClCompile Include="camera.cpp" />
     <ClCompile Include="editmenu.cpp" />
+    <ClCompile Include="LanguageTest.cpp" />
+    <ClCompile Include="PreferencesWindow.cpp" />
     <ClCompile Include="filemenu.cpp" />
     <ClCompile Include="filtermenu.cpp" />
     <ClCompile Include="glad.c" />
@@ -180,6 +192,8 @@
     <ClInclude Include="appcommands.h" />
     <ClInclude Include="appstate.h" />
     <ClInclude Include="camera.h" />
+    <ClInclude Include="LanguageTest.h" />
+    <ClInclude Include="PreferencesWindow.h" />
     <ClInclude Include="cascadiafont.h" />
     <ClInclude Include="editmenu.h" />
     <ClInclude Include="filemenu.h" />

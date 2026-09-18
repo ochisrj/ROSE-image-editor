@@ -8,6 +8,7 @@
 #include <GLFW/glfw3.h>
 
 #include "workspace.h"
+#include "PreferencesWindow.h"
 
 namespace App
 {
@@ -318,12 +319,14 @@ namespace App
         case Cmd::FileCloseAll: Workspace::CloseAllImages(); break;
         case Cmd::FileCloseAndGoToBridge: Workspace::CloseActive(); break;
 
-        // ---- Edit ----
-        case Cmd::EditPreferencesGeneral:     ShowPreferences = true; PrefTab = 0; break;
-        case Cmd::EditPreferencesPerformance: ShowPreferences = true; PrefTab = 1; break;
-        case Cmd::EditPreferencesDisplay:     ShowPreferences = true; PrefTab = 2; break;
-        case Cmd::EditPreferencesScratchDisks:ShowPreferences = true; PrefTab = 3; break;
-        case Cmd::EditPreferencesUnitsRulers: ShowPreferences = true; PrefTab = 4; break;
+        // ---- Edit -> Preferences (now delegated to dedicated PreferencesWindow class) ----
+        // Old inline ShowPreferences flag removed; new class owns modal state.
+        // Mapping old 5-tab indices to full 17-category indices:
+        case Cmd::EditPreferencesGeneral:     PreferencesWindow::Open(0);  break; // General
+        case Cmd::EditPreferencesPerformance: PreferencesWindow::Open(7);  break; // Performance
+        case Cmd::EditPreferencesDisplay:     PreferencesWindow::Open(1);  break; // Interface (Display & Interface)
+        case Cmd::EditPreferencesScratchDisks:PreferencesWindow::Open(9);  break; // Scratch Disks
+        case Cmd::EditPreferencesUnitsRulers: PreferencesWindow::Open(12); break; // Units & Rulers
 
         // ---- View ----
         case Cmd::ViewZoomIn:       Workspace::ZoomIn(); break;

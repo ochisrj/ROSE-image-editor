@@ -6,6 +6,7 @@
 #include "appstate.h"
 #include "appcommands.h"
 #include "workspace.h"
+#include "LanguageTest.h"
 void WindowMenu::DrawMenu()
 {
     if (ImGui::BeginMenu("Window"))
@@ -85,6 +86,9 @@ void WindowMenu::DrawMenu()
         ImGui::Separator();
         ImGui::MenuItem("Application Frame", nullptr, &App::ApplicationFrame);
         ImGui::MenuItem("Options", nullptr, &App::ShowOptions);
+
+        ImGui::Separator();
+        ImGui::MenuItem("Language Test", nullptr, &LanguageTest::Show);
 
         ImGui::EndMenu();
     }
